@@ -1,2 +1,2 @@
 # Viscotester
-Creating a script using pyserial to control a Viscosimeter ViscoTester 6L Haake
+A script using pyserial library to control a Viscosimeter ViscoTester 6L Haake. Initial version. Full of bugs but I'm improving it. 
