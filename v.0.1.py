@@ -3,6 +3,10 @@ import statistics
 import xlsxwriter
 import os
 
+'''
+Obs1: Considerar usar sets para o armazenamento das leituras de viscosidades na próxima versão
+'''
+
 print('\033[1;36m-=-\033[m'*20)
 print('                      \033[1;32mVisco Tester 6L\033[m')
 print('\033[1;36m-=-\033[m'*20)
