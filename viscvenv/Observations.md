@@ -9,3 +9,12 @@ for value in leituras.values():
     for item in value:
         if item < mean or item > mean:
             value.remove(item)
+            
+Na criação do dict, usar zip: 
+dict(zip( 
+     ...:     [1, 1.5, 2], 
+     ...:     [[5, 6, 5], [4, 5, 4], [3, 4, 3]] 
+     ...:     )
+     )
+     
+output: {1: [5, 6, 5], 1.5: [4, 5, 4], 2: [3, 4, 3]}
