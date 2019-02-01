@@ -1,14 +1,15 @@
 import serial
 
 
-def serial_object_creation():
-    ser = serial.Serial('COM1', 9600, timeout=60)
+def serial_object_creation(time_set):
+    ser = serial.Serial('COM1', 9600, timeout=time_set)
     serial_object = ser.readline().split()
     return serial_object
 
 
-def time_for_closing_port(ser):
-    pass
+def time_for_closing_port(object):
+    time_for_closing = (60/int(object[3])) + 5
+    return time_for_closing
 
 
 def torque_validation(serial_object):
@@ -22,24 +23,50 @@ def printing_readings(object):
     print(f'RPM: {int(object[3])} / cP: {float(object[7])} / Torque(%): {float(object[5])}')
 
 
-def storing_RPMs(object):
+def storing_values(object):
+    if int(object[3]) not in registers.keys():
+        registers[int(object[3])] = [float(object[7])]
+    elif int(object[3]) in registers.keys():
+        registers[int(object[3])].append(float(object[7]))
+    print(registers)
+    return registers
+
+
+def storing_cps(object):
     pass
 
 
+def storing_torque(object):
+    pass
+
+
+registers = dict()
+
+time = 200
 while True:
     try:
-        object = serial_object_creation()
+        object = serial_object_creation(time)
+        time = time_for_closing_port(object)
         if torque_validation(object):
-            printing_readings(object)
+            if object == False:
+                print('O aparelho foi stoppado')
+            else:
+                printing_readings(object)
+                registros = storing_values(object)
         else:
             print('Torque máximo atingido')
             print('Leituras não são possíveis de serem feitas')
             print('Pressione STOP no aparelho')
 
     except KeyboardInterrupt:
-        print('Programa interrompido')
+        print(f'Resultados registrados: {registers}')
+        print('Programa interrompido por atalho de teclado')
+        break
+
+    except IndexError:
+        print(f'Resultados registrados: {registers}')
+        print('Foi pressionado STOP no aparelho')
         break
 
 
-print('Aqui temos o fim do programa')
-
+print('FIM DO PROGRAMA')
