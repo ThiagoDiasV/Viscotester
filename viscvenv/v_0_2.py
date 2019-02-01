@@ -25,19 +25,12 @@ def printing_readings(object):
 
 def storing_values(object):
     if int(object[3]) not in registers.keys():
-        registers[int(object[3])] = [float(object[7])]
+        registers[int(object[3])] = [[float(object[7])], [float(object[5])]]
     elif int(object[3]) in registers.keys():
-        registers[int(object[3])].append(float(object[7]))
+        registers[int(object[3])][0].append(float(object[7]))
+        registers[int(object[3])][1].append(float(object[5]))
     print(registers)
     return registers
-
-
-def storing_cps(object):
-    pass
-
-
-def storing_torque(object):
-    pass
 
 
 registers = dict()
