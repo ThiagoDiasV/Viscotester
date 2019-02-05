@@ -3,7 +3,6 @@ import xlsxwriter
 from statistics import mean, stdev
 from os import startfile
 from time import sleep
-# import seaborn as sns
 
 
 def initial_menu():
@@ -25,7 +24,12 @@ def initial_menu():
 
 def sample_name():
     sample_name = str(input('Digite o nome da amostra: '))
+    sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
+    sleep(2.5)
+    print('Ao finalizar suas leituras, pressione STOP no aparelho.')
+    sleep(2.5)
+    print('Ao pressionar STOP, o programa levará alguns segundos para preparar sua planilha. Aguarde...')
     return sample_name
 
 
@@ -36,7 +40,7 @@ def serial_object_creator(time_set):
 
 
 def timer_for_closing_port(object):
-    time_for_closing = (60/float(object[3])) + 15
+    time_for_closing = (60/float(object[3])) + 30
     return time_for_closing
 
 
@@ -48,7 +52,7 @@ def torque_validator(serial_object):
 
 
 def readings_printer(object):
-    print(f'RPM: {float(object[3])} / cP: {int(object[7])} / Torque: {float(object[5])}%')
+    print(f' RPM: {float(object[3]):>20} /// cP: {int(object[7]):>20} /// Torque: {float(object[5]):>20}%')
 
 
 def values_storager(object):
@@ -69,29 +73,35 @@ def sheet_maker(sample_name, **registers):
                 if len(value[0]) > 1:    
                     mean_value = mean(value[0])
                     std_value = stdev(value[0])
-                    cp_list = [x for x in value[0] if (x > mean_value - std_value)]
-                    cp_list = [x for x in cp_list if (x < mean_value + std_value)]
-                    value[0] = cp_list
+                    if std_value != 0:
+                        cp_list = [x for x in value[0] if (x > mean_value - std_value)]
+                        cp_list = [x for x in cp_list if (x < mean_value + std_value)]
+                        value[0] = cp_list
+                    else:
+                        pass
                 else:
                     pass
+            print(f'Dados processados: {registers}')
             return registers
 
 
         workbook = xlsxwriter.Workbook(f'{sample_name}.xlsx')
         worksheet = workbook.add_worksheet()
         bold = workbook.add_format({'bold': True})
+        worksheet.set_column(0, 8, 20)
+        worksheet.set_column(4, 4, 25)
         worksheet.write('A1', f'{sample_name}', bold)
         worksheet.write('B1', 'RPM', bold)
         worksheet.write('C1', 'cP', bold)
         worksheet.write('D1', 'Torque(%)', bold)
         worksheet.write('E1', 'Processamento dos dados >>', bold)
-        worksheet.write('H1', 'RPM', bold)
-        worksheet.write('I1', 'cP', bold)
+        worksheet.write('G1', 'RPM', bold)
+        worksheet.write('H1', 'cP', bold)
         row = 1
         col = 1
         for key, value in registers.items():
-            worksheet.write(row, col, float(key))
             for cp in value[0]:
+                worksheet.write(row, col, float(key))
                 worksheet.write(row, col + 1, cp)
                 row += 1
             row -= len(value[0])
@@ -101,9 +111,28 @@ def sheet_maker(sample_name, **registers):
         processed_registers = data_processor(**registers)
         row = col = 1
         for key, value in processed_registers.items():
-            worksheet.write(row, col + 6, float(key))
-            worksheet.write(row, col + 7, mean(value[0]))
+            worksheet.write(row, col + 5, float(key))
+            if len(value[0]) > 1:
+                worksheet.write(row, col + 6, mean(value[0]))
+            else:
+                worksheet.write(row, col + 6, mean(value[0])) 
             row += 1
+        chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+        chart.add_series({
+            'categories': f'=Sheet1!$G2$:$G${len(processed_registers.keys()) + 1}', 
+            'values': f'=Sheet1!$H$2:$H${len(processed_registers.values()) + 1}', 
+            'line': {'color': 'red'}
+            })
+        chart.set_title({'name': f'{sample_name}'})
+        chart.set_x_axis({
+            'name': 'RPM',
+            'name_font': {'size': 14, 'bold': True},
+        })
+        chart.set_y_axis({
+            'name': 'cP',
+            'name_font': {'size': 14, 'bold': True},
+        })
+        worksheet.insert_chart('J2', chart)
         workbook.close()
         print('Aguarde que uma planilha será aberta com seus resultados.')
         startfile(f'{sample_name}.xlsx')
@@ -121,7 +150,10 @@ time = 200  # Tempo para timeout da porta inicial alto para evitar bugs na inici
 initial_menu()
 sample_name = sample_name()
 
-sleep(10)  # Tempo de espera para evitar que bugs que o aparelho gera na inicialização possam dar crash no programa.
+sleep(5)  # Tempo de espera para evitar que bugs que o aparelho gera na inicialização possam dar crash no programa.
+print('-' * 90)
+print('#' * 39, ' LEITURAS ', '#' * 39)
+print('-' * 90)
 while True:
     try:
         object = serial_object_creator(time)
@@ -147,9 +179,13 @@ while True:
         print('Foi pressionado STOP no aparelho')
         break
 
+    except:
+        print(registers)
+
 
 sheet_maker(sample_name, **registers)
 
 
 print('FIM DO PROGRAMA')
 print('OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
+sleep(10)
