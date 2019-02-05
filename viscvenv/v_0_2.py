@@ -52,7 +52,7 @@ def torque_validator(serial_object):
 
 
 def readings_printer(object):
-    print(f' RPM: {float(object[3]):>20} /// cP: {int(object[7]):>20} /// Torque: {float(object[5]):>20}%')
+    print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} /// Torque: {float(object[5]):.>20}%')
 
 
 def values_storager(object):
@@ -81,7 +81,6 @@ def sheet_maker(sample_name, **registers):
                         pass
                 else:
                     pass
-            print(f'Dados processados: {registers}')
             return registers
 
 
@@ -170,17 +169,12 @@ while True:
             print('Pressione STOP no aparelho')
 
     except KeyboardInterrupt:
-        print(f'Resultados registrados: {registers}')
         print('Programa interrompido por atalho de teclado')
         break
 
     except IndexError:
-        print(f'Resultados registrados: {registers}')
         print('Foi pressionado STOP no aparelho')
         break
-
-    except:
-        print(registers)
 
 
 sheet_maker(sample_name, **registers)
