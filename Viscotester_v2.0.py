@@ -1,10 +1,9 @@
-# Para rodar o programa digite com o segundo botão do mouse sobre a tela abaixo e selecione "Run Python File in Terminal"
-
 import serial
 import xlsxwriter
 from statistics import mean, stdev
 from os import startfile
 from time import sleep
+from collections import OrderedDict
 
 
 def initial_menu():
@@ -61,15 +60,15 @@ def readings_printer(object):
 
 
 def values_storager(object):
-    if str(float(object[3])) not in registers.keys():
-        registers[str(float(object[3]))] = [[int(object[7])], [float(object[5])]]
-    elif str(float(object[3])) in registers.keys():
-        registers[str(float(object[3]))][0].append(int(object[7]))
-        registers[str(float(object[3]))][1].append(float(object[5]))
+    if float(object[3]) not in registers.keys():
+        registers[float(object[3])] = [[int(object[7])], [float(object[5])]]
+    elif float(object[3]) in registers.keys():
+        registers[float(object[3])][0].append(int(object[7]))
+        registers[float(object[3])][1].append(float(object[5]))
     return registers
 
 
-def sheet_maker(sample_name, **registers):
+def sheet_maker(sample_name, **registers):    
     if len(registers) > 0:
 
 
@@ -179,11 +178,11 @@ while True:
 
     except IndexError:
         print('Foi pressionado STOP no aparelho')
+        registers = dict(OrderedDict(sorted(registers.items())))
         break
 
 
-sheet_maker(sample_name, **registers)
-
+sheet_maker(sample_name, **{str(k): v for k , v in registers.items()})
 
 print('OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
 sleep(10)
