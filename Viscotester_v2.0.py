@@ -1,9 +1,10 @@
+import re
+from collections import OrderedDict
+from os import startfile
+from statistics import mean, stdev
+from time import sleep
 import serial
 import xlsxwriter
-from statistics import mean, stdev
-from os import startfile
-from time import sleep
-from collections import OrderedDict
 
 
 def initial_menu():
@@ -24,7 +25,13 @@ def initial_menu():
 
 
 def sample_name():
-    sample_name = str(input('Digite o nome da amostra: '))
+    regexp = re.compile(r'[\\/|<>*:?"]')
+    sample_name = str(input('Digite o nome da amostra: ')).strip()
+    while regexp.search(sample_name):
+        print('Você digitou um caractere não permitido para nome de arquivo.')
+        print('Saiba que você não pode usar nenhum dos caracteres abaixo: ')
+        print(' \ / | < > * : " ?')
+        sample_name = str(input('Digite novamente um nome para a amostra sem caracteres proibidos: '))
     sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
     sleep(2.5)
@@ -43,8 +50,10 @@ def serial_object_creator(time_set):
 def timer_for_closing_port(object):
     if float(object[3]) <= 6:
         time_for_closing = 2*(60/float(object[3]))
-    else:
+    elif float(object[3]) < 100:
         time_for_closing = 3*(60/float(object[3]))
+    else:
+        time_for_closing = 25*(60/float(object[3]))
     return time_for_closing
 
 
@@ -114,12 +123,13 @@ def sheet_maker(sample_name, **registers):
         processed_registers = data_processor(**registers)
         row = col = 1
         for key, value in processed_registers.items():
-            worksheet.write(row, col + 5, float(key))
-            if len(value[0]) > 1:
-                worksheet.write(row, col + 6, mean(value[0]))
-            else:
-                worksheet.write(row, col + 6, mean(value[0])) 
-            row += 1
+            if mean(value[0]) != 0:    
+                worksheet.write(row, col + 5, float(key))
+                if len(value[0]) > 1:
+                    worksheet.write(row, col + 6, mean(value[0]))
+                else:
+                    worksheet.write(row, col + 6, value[0][0]) 
+                row += 1
         chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
         chart.add_series({
             'categories': f'=Sheet1!$G2$:$G${len(processed_registers.keys()) + 1}', 
