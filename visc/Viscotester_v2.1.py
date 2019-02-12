@@ -154,8 +154,8 @@ def date_storage():
     '''
 
     date = datetime.date.today()
-    hour = datetime.datetime.now().hour
-    minute = datetime.datetime.now().minute
+    hour = str(datetime.datetime.now().hour)
+    minute = str(datetime.datetime.now().minute)
     date_today = (date.day, date.month, date.year, hour, minute)
     return date_today
     
