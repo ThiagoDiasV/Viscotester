@@ -289,4 +289,4 @@ while repeat_option != 'N':
 workbook_close_function(workbook)
 workbook_launcher(workbook) 
 print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
-sleep(10)
+
