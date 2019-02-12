@@ -9,7 +9,7 @@ import serial
 import xlsxwriter
 import datetime
 
-colorama.init(autoreset=True)
+colorama.init(autoreset=True, convert=True)
 
 
 def initial_menu():
@@ -62,7 +62,7 @@ def sample_name_function():
     Require the name of the sample to put on the xlsx filename
     '''
 
-    sample_name = str(input('Digite um nome para a planilha que será gerada: ')).strip()
+    sample_name = str(input('Digite um nome para o arquivo será gerado: ')).strip()
     regex_name_validation(sample_name)
     sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
@@ -175,7 +175,7 @@ def worksheet_maker(workbook, **registers):
     After that, this function creates a chart with the processed data
     '''
 
-    worksheet_name = str(input('Digite o nome da planilha: ')).strip()
+    worksheet_name = str(input('Digite o nome da amostra: ')).strip()
     worksheet = workbook.add_worksheet(f'{worksheet_name}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
