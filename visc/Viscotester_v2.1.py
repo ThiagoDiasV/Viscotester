@@ -13,6 +13,10 @@ colorama.init(autoreset=True)
 
 
 def initial_menu():
+    '''
+    Prints an initial menu at the screen
+    '''
+
     print(Fore.GREEN + '-' * 90)
     print(Fore.BLUE + '#' * 37 + Fore.CYAN + ' VISCOTESTER 6L ' + Style.RESET_ALL  + Fore.BLUE + '#' * 37)
     print(Fore.BLUE + '#' * 35 + Fore.CYAN + ' INSTRUÇÕES DE USO ' + Style.RESET_ALL + Fore.BLUE + '#' * 36)
@@ -30,12 +34,20 @@ def initial_menu():
 
 
 def final_menu():
+    '''
+    Prints some informations if the maximum torque is obtained from the Viscotester and require the user to press STOP on the equipment
+    '''
+
     print('Torque máximo atingido')
     print('Leituras não são mais possíveis de serem feitas')
     print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho')
 
 
 def regex_name_validation(sample_name):
+    '''
+    Does a regex validation on sample name and worksheet name
+    '''
+
     regexp = re.compile(r'[\\/|<>*:?"]')
     while regexp.search(sample_name):
         print(Fore.RED + 'Você digitou um caractere não permitido para nome de arquivo.')
@@ -46,6 +58,10 @@ def regex_name_validation(sample_name):
 
 
 def sample_name_function():
+    '''
+    Require the name of the sample to put on the xlsx filename
+    '''
+
     sample_name = str(input('Digite um nome para a planilha que será gerada: ')).strip()
     regex_name_validation(sample_name)
     sleep(2.5)
@@ -60,12 +76,21 @@ def sample_name_function():
 
 
 def serial_object_creator(time_set):
+    '''
+    At each rotation of the equipment this function creates a serial object 
+    This is important because at each rotation the timeout to close serial port should change
+    '''
+
     ser = serial.Serial('COM1', 9600, timeout=time_set)
     serial_object = ser.readline().split()
     return serial_object
 
 
 def timer_for_closing_port(object):
+    '''
+    Defines a new time for closing serial port. This times depends on the rotation per minute parameter of equipment
+    '''
+
     if float(object[3]) <= 6:
         time_for_closing = 2*(60/float(object[3]))
     elif float(object[3]) < 100:
@@ -83,10 +108,18 @@ def torque_validator(serial_object):
 
 
 def readings_printer(object):
+    '''
+    Prints the results of the equipment readings on the screen
+    '''
+
     print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} /// Torque: {float(object[5]):.>20}%')
 
 
 def values_storager(object):
+    '''
+    Storages the readings inside a dict named 'registers' 
+    '''
+
     if float(object[3]) not in registers.keys():
         registers[float(object[3])] = [[int(object[7])], [float(object[5])]]
     elif float(object[3]) in registers.keys():
@@ -96,6 +129,10 @@ def values_storager(object):
 
 
 def data_processor(**registers):
+    '''
+    Processes the data of registers to delete outliers
+    '''
+
     for value in registers.values():
         if len(value[0]) > 1:    
             mean_value = mean(value[0])
@@ -112,28 +149,42 @@ def data_processor(**registers):
 
 
 def date_storage():
+    '''
+    A function to create a tuple with the today's date
+    '''
+
     date = datetime.date.today()
     date_today = (date.day, date.month, date.year)
     return date_today
     
 
 def workbook_maker(sample_name):
+    '''
+    This function creates a workbook in format .xlsx
+    '''
+
     date_today = date_storage()    
     workbook = xlsxwriter.Workbook(f'{sample_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')
     return workbook
 
 
 def worksheet_maker(workbook, **registers):
+    '''
+    This function creates new worksheets inside the created workbook and put the values in columns
+    Inside this function I put a feature to put the processed data in other columns
+    After that, this function creates a chart with the processed data
+    '''
+
     worksheet_name = str(input('Digite o nome da planilha: ')).strip()
     worksheet = workbook.add_worksheet(f'{worksheet_name}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
     worksheet.set_column(0, 8, 20)
     worksheet.set_column(4, 4, 25)
-    worksheet.write('A1', f'{sample_name}', bold)
+    worksheet.write('A1', f'{worksheet_name}', bold)
     worksheet.write('A2', 'Data', italic)
     date_today = date_storage() 
-    worksheet.write('A3', f'{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}')
+    worksheet.write('A3', f'{date_today[0]:02d}/{date_today[1]:02d}/{date_today[2]:04d}')
     worksheet.write('B1', 'RPM', bold)
     worksheet.write('C1', 'cP', bold)
     worksheet.write('D1', 'Torque(%)', bold)
@@ -167,7 +218,7 @@ def worksheet_maker(workbook, **registers):
         'values': f'={worksheet_name}!$H$2:$H${len(processed_registers.values()) + 1}', 
         'line': {'color': 'green'}
         })
-    chart.set_title({'name': f'{sample_name}'})
+    chart.set_title({'name': f'{worksheet_name}'})
     chart.set_x_axis({
         'name': 'RPM',
         'name_font': {'size': 14, 'bold': True},
@@ -180,10 +231,18 @@ def worksheet_maker(workbook, **registers):
 
 
 def workbook_close_function(workbook):
+    '''
+    A simple function to close the created workbook
+    '''
+
     workbook.close()
 
 
 def workbook_launcher(workbook):
+    '''
+    A simple function to launch the workbook for user see his results
+    '''
+
     date_today = date_storage()    
     startfile(f'{sample_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')   
 
@@ -223,10 +282,11 @@ while repeat_option != 'N':
 
 
     worksheet_maker(workbook, **{str(k): v for k , v in registers.items()})
-    repeat_option = str(input('Você quer ler outra amostra?\nResponda com "S" para se sim ou "N" para se não: ')).strip().upper()[0]
+    print('Você quer ler outra amostra?')
+    print('Responda com "S" para se sim ou "N" para se não')
+    print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
+    repeat_option = str(input('[S/N]: ')).strip().upper()[0]
 workbook_close_function(workbook)
-print('Aguarde alguns segundos enquanto sua planilha é feita')
-print('Quanto menor a rotação do fuso na última leitura, mais demorada é a liberação da planilha')
 workbook_launcher(workbook) 
 print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
 sleep(10)
