@@ -43,18 +43,18 @@ def final_menu():
     print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho')
 
 
-def regex_name_validation(sample_name):
+def regex_name_validation(name):
     '''
     Does a regex validation on sample name and worksheet name
     '''
 
     regexp = re.compile(r'[\\/|<>*:?"]')
-    while regexp.search(sample_name):
+    while regexp.search(name):
         print(Fore.RED + 'Você digitou um caractere não permitido para nome de arquivo.')
         print(Fore.RED + 'Saiba que você não pode usar nenhum dos caracteres abaixo: ')
         print(Fore.RED + ' \ / | < > * : " ?')
-        sample_name = str(input('Digite novamente um nome para a amostra sem caracteres proibidos: '))
-    return sample_name
+        name = str(input('Digite novamente um nome para a amostra sem caracteres proibidos: '))
+    return name
 
 
 def sample_name_function():
@@ -63,7 +63,7 @@ def sample_name_function():
     '''
 
     sample_name = str(input('Digite um nome para o arquivo será gerado: ')).strip()
-    regex_name_validation(sample_name)
+    sample_name = regex_name_validation(sample_name)
     sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
     sleep(2.5)
@@ -154,7 +154,9 @@ def date_storage():
     '''
 
     date = datetime.date.today()
-    date_today = (date.day, date.month, date.year)
+    hour = datetime.datetime.now().hour
+    minute = datetime.datetime.now().minute
+    date_today = (date.day, date.month, date.year, hour, minute)
     return date_today
     
 
@@ -176,6 +178,7 @@ def worksheet_maker(workbook, **registers):
     '''
 
     worksheet_name = str(input('Digite o nome da amostra: ')).strip()
+    worksheet_name = regex_name_validation(worksheet_name)
     worksheet = workbook.add_worksheet(f'{worksheet_name}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
@@ -289,4 +292,3 @@ while repeat_option != 'N':
 workbook_close_function(workbook)
 workbook_launcher(workbook) 
 print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
-sleep(10)
