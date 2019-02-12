@@ -282,6 +282,7 @@ while repeat_option != 'N':
 
 
     worksheet_maker(workbook, **{str(k): v for k , v in registers.items()})
+    
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
