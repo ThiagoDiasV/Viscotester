@@ -62,7 +62,7 @@ def file_name_function():
     Require the name of the sample to put on the xlsx filename
     '''
 
-    file_name = str(input('Digite um nome para o arquivo será gerado: ')).strip()
+    file_name = str(input('Digite um nome para o arquivo (.xlsx) será gerado: ')).strip()
     file_name = regex_name_validation(file_name)
     return file_name
 
@@ -165,7 +165,7 @@ def worksheet_name_function():
     This function records the name of each worksheet using the name of the sample evaluated
     '''
     sample_name = str(input('Digite o nome da amostra: ')).strip()
-    sample_name = regex_name_validation(sample_name).replace(' ', '')
+    sample_name = regex_name_validation(sample_name)
     return sample_name
 
 
@@ -176,7 +176,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     After that, this function creates a chart with the processed data
     '''
 
-    worksheet = workbook.add_worksheet(f'{worksheet_name}')
+    worksheet = workbook.add_worksheet(f'{worksheet_name.replace(" ", "")}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
     worksheet.set_column(0, 8, 20)
@@ -214,8 +214,8 @@ def worksheet_maker(workbook, worksheet_name, **registers):
             row += 1
     chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
     chart.add_series({
-        'categories': f'={worksheet_name}!$G2$:$G${len(processed_registers.keys()) + 1}', 
-        'values': f'={worksheet_name}!$H$2:$H${len(processed_registers.values()) + 1}', 
+        'categories': f'={worksheet_name.replace(" ", "")}!$G2$:$G${len(processed_registers.keys()) + 1}', 
+        'values': f'={worksheet_name.replace(" ", "")}!$H$2:$H${len(processed_registers.values()) + 1}', 
         'line': {'color': 'green'}
         })
     chart.set_title({'name': f'{worksheet_name}'})
@@ -228,8 +228,8 @@ def worksheet_maker(workbook, worksheet_name, **registers):
         'name_font': {'size': 14, 'bold': True},
     })
     chart.set_size({
-        'width': 720, 
-        'height': 550
+        'width': 700, 
+        'height': 500
     })
     worksheet.insert_chart(row + 2, 5, chart)
 
@@ -255,7 +255,9 @@ initial_menu()
 file_name = file_name_function() 
 workbook = workbook_maker(file_name)
 repeat_option = ''
+regex_repeat = re.compile(r'[NS]')
 while repeat_option != 'N':
+    repeat_option = ''
     worksheet_name = worksheet_name_function()
     sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
@@ -298,7 +300,11 @@ while repeat_option != 'N':
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
-    repeat_option = str(input('[S/N]: ')).strip().upper()[0]
+    while not regex_repeat.search(repeat_option):
+        repeat_option = str(input('[S/N]: ')).strip().upper()[0]
+        if repeat_option == 'S':
+            print('Pressione ' + Fore.GREEN + 'START')
+            sleep(5)
 workbook_close_function(workbook)
 workbook_launcher(workbook) 
 print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
