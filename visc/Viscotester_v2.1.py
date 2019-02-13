@@ -40,39 +40,31 @@ def final_menu():
 
     print('Torque máximo atingido')
     print('Leituras não são mais possíveis de serem feitas')
-    print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho')
+    print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho e ' + Fore.GREEN + 'aguarde')
 
 
 def regex_name_validation(name):
     '''
-    Does a regex validation on sample name and worksheet name
+    Does a validation on sample name and worksheet name using regex
     '''
 
     regexp = re.compile(r'[\\/|<>*:?"]')
     while regexp.search(name):
         print(Fore.RED + 'Você digitou um caractere não permitido para nome de arquivo.')
         print(Fore.RED + 'Saiba que você não pode usar nenhum dos caracteres abaixo: ')
-        print(Fore.RED + ' \ / | < > * : " ?')
+        print(Fore.RED + r' \ / | < > * : " ?')
         name = str(input('Digite novamente um nome para a amostra sem caracteres proibidos: '))
     return name
 
 
-def sample_name_function():
+def file_name_function():
     '''
     Require the name of the sample to put on the xlsx filename
     '''
 
-    sample_name = str(input('Digite um nome para o arquivo será gerado: ')).strip()
-    sample_name = regex_name_validation(sample_name)
-    sleep(2.5)
-    print('Aguarde que em instantes o programa se inicializará.')
-    sleep(2.5)
-    print('Ao finalizar suas leituras, pressione ' + Fore.RED + 'STOP ' + Style.RESET_ALL + 'no aparelho.')
-    sleep(2.5)
-    print('Ao pressionar ' + Fore.RED + 
-          'STOP' + Style.RESET_ALL + 
-          ', o programa levará alguns segundos para preparar sua planilha. Aguarde.')
-    return sample_name
+    file_name = str(input('Digite um nome para o arquivo será gerado: ')).strip()
+    file_name = regex_name_validation(file_name)
+    return file_name
 
 
 def serial_object_creator(time_set):
@@ -92,9 +84,9 @@ def timer_for_closing_port(object):
     '''
 
     if float(object[3]) <= 6:
-        time_for_closing = 2*(60/float(object[3]))
+        time_for_closing = 2.5*(60/float(object[3]))
     elif float(object[3]) < 100:
-        time_for_closing = 3*(60/float(object[3]))
+        time_for_closing = 3.5*(60/float(object[3]))
     else:
         time_for_closing = 25*(60/float(object[3]))
     return time_for_closing
@@ -154,31 +146,36 @@ def date_storage():
     '''
 
     date = datetime.date.today()
-    hour = str(datetime.datetime.now().hour)
-    minute = str(datetime.datetime.now().minute)
-    date_today = (date.day, date.month, date.year, hour, minute)
+    date_today = (date.day, date.month, date.year)
     return date_today
     
 
-def workbook_maker(sample_name):
+def workbook_maker(file_name):
     '''
     This function creates a workbook in format .xlsx
     '''
 
     date_today = date_storage()    
-    workbook = xlsxwriter.Workbook(f'{sample_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')
+    workbook = xlsxwriter.Workbook(f'{file_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')
     return workbook
 
 
-def worksheet_maker(workbook, **registers):
+def worksheet_name_function():
+    '''
+    This function records the name of each worksheet using the name of the sample evaluated
+    '''
+    sample_name = str(input('Digite o nome da amostra: ')).strip()
+    sample_name = regex_name_validation(sample_name).replace(' ', '')
+    return sample_name
+
+
+def worksheet_maker(workbook, worksheet_name, **registers):
     '''
     This function creates new worksheets inside the created workbook and put the values in columns
     Inside this function I put a feature to put the processed data in other columns
     After that, this function creates a chart with the processed data
     '''
 
-    worksheet_name = str(input('Digite o nome da amostra: ')).strip()
-    worksheet_name = regex_name_validation(worksheet_name)
     worksheet = workbook.add_worksheet(f'{worksheet_name}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
@@ -230,7 +227,11 @@ def worksheet_maker(workbook, **registers):
         'name': 'cP',
         'name_font': {'size': 14, 'bold': True},
     })
-    worksheet.insert_chart('F18', chart)
+    chart.set_size({
+        'width': 720, 
+        'height': 550
+    })
+    worksheet.insert_chart(row + 2, 5, chart)
 
 
 def workbook_close_function(workbook):
@@ -247,16 +248,25 @@ def workbook_launcher(workbook):
     '''
 
     date_today = date_storage()    
-    startfile(f'{sample_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')   
+    startfile(f'{file_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')   
 
 
 initial_menu()
-sample_name = sample_name_function() 
-workbook = workbook_maker(sample_name)
+file_name = file_name_function() 
+workbook = workbook_maker(file_name)
 repeat_option = ''
 while repeat_option != 'N':
+    worksheet_name = worksheet_name_function()
+    sleep(2.5)
+    print('Aguarde que em instantes o programa se inicializará.')
+    sleep(2.5)
+    print('Ao finalizar suas leituras, pressione ' + Fore.RED + 'STOP ' + Style.RESET_ALL + 'no aparelho.')
+    sleep(2.5)
+    print('Ao pressionar ' + Fore.RED + 
+          'STOP' + Style.RESET_ALL + 
+          ', o programa levará alguns segundos para preparar sua planilha. Aguarde.') 
     registers = dict()  # Registros das leituras serão armazenados neste dicionário.
-    time = 250  # Tempo para timeout da porta inicial alto para evitar bugs na inicialização do programa.
+    time = 300  # Tempo para timeout da porta inicial alto para evitar bugs na inicialização do programa.
     sleep(5)  # Tempo de espera para evitar que bugs que o aparelho gera na inicialização possam dar crash no programa.
     print(Fore.GREEN + '-' * 90)
     print(Fore.BLUE + '#' * 40 + Fore.CYAN + ' LEITURAS ' + Fore.BLUE + '#' * 40)
@@ -284,7 +294,7 @@ while repeat_option != 'N':
             break
 
 
-    worksheet_maker(workbook, **{str(k): v for k , v in registers.items()})
+    worksheet_maker(workbook, worksheet_name, **{str(k): v for k , v in registers.items()})
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')

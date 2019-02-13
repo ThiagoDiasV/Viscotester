@@ -1,4 +1,2 @@
-import datetime
-
-hour = datetime.datetime.now()
-print(hour[0])
+string = 'Jucá 5% 5'
+print(string.replace(' ', ''))
