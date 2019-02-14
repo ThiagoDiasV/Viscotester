@@ -8,6 +8,8 @@ from colorama import Fore, Style
 import serial
 import xlsxwriter
 import datetime
+from math import log10
+
 
 colorama.init(autoreset=True, convert=True)
 
