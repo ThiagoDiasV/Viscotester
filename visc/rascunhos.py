@@ -1,13 +1,16 @@
-from math import log10
+import pandas as pd 
+from sklearn import linear_model
 
-RPM = (0.3, 0.5, 0.6, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 10, 12, 20, 30, 50, 60, 100, 200)
-cP = (1000, 900, 800, 700, 600, 500, 400, 300, 200, 100, 80, 60, 40, 20)
+dataframe = pd.DataFrame()
+dataframe['x'] = [1, 2, 3, 4, 5]
+dataframe['y'] = [100, 250, 300, 400, 500]
+x_values = dataframe[['x']]
+y_values = dataframe[['y']]
 
-lista = tuple(log10(x) for x in RPM)
-lista2 = tuple(log10(x) for x in cP)
-print(type(lista))
-for i in lista:
-    print(i)
-print(type(lista2))
-for i in lista2:
-    print(i)
+model = linear_model.LinearRegression()
+model.fit(x_values, y_values)
+
+print('y = ax + b')
+print(model.score(x_values, y_values))
+print('a = %.2f = a inclinação da linha de tendência.' % model.coef_)
+print('b = %.2f = o ponto onde a linha de tendência atinge o eixo y.' % model.intercept_)

@@ -9,6 +9,8 @@ import serial
 import xlsxwriter
 import datetime
 from math import log10
+from sklearn.linear_model import LinearRegression
+import pandas as pd
 
 
 colorama.init(autoreset=True, convert=True)
@@ -135,11 +137,21 @@ def data_processor(**registers):
                 cp_list = [x for x in value[0] if (x > mean_value - std_value)]
                 cp_list = [x for x in cp_list if (x < mean_value + std_value)]
                 value[0] = cp_list
-            else:
-                pass
-        else:
-            pass
     return registers
+
+
+def logarithm_values_maker(**registers):
+    '''
+    Calculates the base-10 logarithm of the processed values
+    '''
+
+    registers = {float(k): v for k, v in registers.items()}
+    cp_list = []
+    for value in registers.values():
+        cp_list.append(value[0][0])
+    logarithm_list = [[log10(k) for k in registers.keys()], 
+                [log10(v) for v in cp_list]]
+    return logarithm_list 
 
 
 def date_storage():
@@ -171,6 +183,21 @@ def worksheet_name_function():
     return sample_name
 
 
+def linear_regression_values(*log_values):
+    df = pd.DataFrame()
+    df['x'] = log_values[0]
+    df['y'] = log_values[1]
+    X = df[['x']]
+    y = df[['y']]
+    linear_regression = LinearRegression()
+    linear_regression.fit(X, y)
+    r_squared = linear_regression.score(X, y)
+    intercept = linear_regression.intercept_
+    slope = linear_regression.coef_
+    results = (r_squared, intercept, slope)
+    return results
+
+
 def worksheet_maker(workbook, worksheet_name, **registers):
     '''
     This function creates new worksheets inside the created workbook and put the values in columns
@@ -181,7 +208,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     worksheet = workbook.add_worksheet(f'{worksheet_name.replace(" ", "")}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
-    worksheet.set_column(0, 8, 20)
+    worksheet.set_column(0, 15, 15)
     worksheet.set_column(4, 4, 25)
     worksheet.write('A1', f'{worksheet_name}', bold)
     worksheet.write('A2', 'Data', italic)
@@ -193,6 +220,12 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     worksheet.write('E1', 'Processamento dos dados >>', bold)
     worksheet.write('G1', 'RPM', bold)
     worksheet.write('H1', 'cP', bold)
+    worksheet.write('J1', 'RPM log10', bold)
+    worksheet.write('K1', 'cP log10', bold)
+    worksheet.write('L1', 'Intercepto', bold)
+    # worksheet.write_array_formula(f'L2: ', '=INTERCEPT()') continuar daqui, adicionar fórmulas ao programa
+    worksheet.write('M1', 'Inclinação', bold)
+    worksheet.write('N1', 'Correlação', bold)
     row = 1
     col = 1
     for key, value in registers.items():
@@ -214,26 +247,55 @@ def worksheet_maker(workbook, worksheet_name, **registers):
             else:
                 worksheet.write(row, col + 6, value[0][0]) 
             row += 1
-    chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
-    chart.add_series({
+    log_list = logarithm_values_maker(**processed_registers)
+    linear_regression_results = linear_regression_values(*log_list)
+    worksheet.write_column('J2', log_list[0])
+    worksheet.write_column('K2', log_list[1])
+    worksheet.write('L2', linear_regression_results[1])
+    worksheet.write('M2', linear_regression_results[2])
+    worksheet.write('N2', linear_regression_results[0])
+
+    chart_1 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+    chart_1.add_series({
         'categories': f'={worksheet_name.replace(" ", "")}!$G2$:$G${len(processed_registers.keys()) + 1}', 
         'values': f'={worksheet_name.replace(" ", "")}!$H$2:$H${len(processed_registers.values()) + 1}', 
         'line': {'color': 'green'}
         })
-    chart.set_title({'name': f'{worksheet_name}'})
-    chart.set_x_axis({
+    chart_1.set_title({'name': f'{worksheet_name}'})
+    chart_1.set_x_axis({
         'name': 'RPM',
         'name_font': {'size': 14, 'bold': True},
     })
-    chart.set_y_axis({
+    chart_1.set_y_axis({
         'name': 'cP',
         'name_font': {'size': 14, 'bold': True},
     })
-    chart.set_size({
-        'width': 700, 
-        'height': 500
+    chart_1.set_size({
+        'width': 600, 
+        'height': 520
     })
-    worksheet.insert_chart(row + 2, 5, chart)
+    worksheet.insert_chart(row + 2, 4, chart_1)
+
+    chart_2 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+    chart_2.add_series({
+        'categories': f'={worksheet_name.replace(" ", "")}!$J$2:$J${len(processed_registers.keys()) + 1}',
+        'values': f'={worksheet_name.replace(" ", "")}!$K$2:$K${len(processed_registers.values()) + 1}',
+        'line': {'color': 'blue'}
+    })
+    chart_2.set_title({'name': f'log10 {worksheet_name}'})
+    chart_2.set_x_axis({
+        'name': 'RPM',
+        'name_font': {'size': 14, 'bold': True},
+    })
+    chart_2.set_y_axis({
+        'name': 'cP',
+        'name_font': {'size': 14, 'bold': True},
+    })
+    chart_2.set_size({
+        'width': 600,
+        'height': 520
+    })
+    worksheet.insert_chart(row + 2, 9, chart_2)
 
 
 def workbook_close_function(workbook):
@@ -302,11 +364,19 @@ while repeat_option != 'N':
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
-    while not regex_repeat.search(repeat_option):
-        repeat_option = str(input('[S/N]: ')).strip().upper()[0]
-        if repeat_option == 'S':
-            print('Pressione ' + Fore.GREEN + 'START')
-            sleep(5)
+    try:
+        while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
+            repeat_option = str(input('[S/N]: ')).strip().upper()[0]
+            if repeat_option == 'S':
+                print('Pressione ' + Fore.GREEN + 'START')
+                sleep(5)
+    except IndexError: 
+        while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
+            repeat_option = str(input('[S/N]: ')).strip().upper()[0]
+            if repeat_option == 'S':
+                print('Pressione ' + Fore.GREEN + 'START')
+                sleep(5)
+
 workbook_close_function(workbook)
 workbook_launcher(workbook) 
 print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
