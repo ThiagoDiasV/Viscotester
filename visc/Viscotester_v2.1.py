@@ -9,8 +9,6 @@ import serial
 import xlsxwriter
 import datetime
 from math import log10
-from sklearn.linear_model import LinearRegression
-import pandas as pd
 
 
 colorama.init(autoreset=True, convert=True)
@@ -183,21 +181,6 @@ def worksheet_name_function():
     return sample_name
 
 
-def linear_regression_values(*log_values):
-    df = pd.DataFrame()
-    df['x'] = log_values[0]
-    df['y'] = log_values[1]
-    X = df[['x']]
-    y = df[['y']]
-    linear_regression = LinearRegression()
-    linear_regression.fit(X, y)
-    r_squared = linear_regression.score(X, y)
-    intercept = linear_regression.intercept_
-    slope = linear_regression.coef_
-    results = (r_squared, intercept, slope)
-    return results
-
-
 def worksheet_maker(workbook, worksheet_name, **registers):
     '''
     This function creates new worksheets inside the created workbook and put the values in columns
@@ -219,11 +202,11 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     worksheet.write('D1', 'Torque(%)', bold)
     worksheet.write('E1', 'Processamento dos dados >>', bold)
     worksheet.write('G1', 'RPM', bold)
-    worksheet.write('H1', 'cP', bold)
-    worksheet.write('J1', 'RPM log10', bold)
-    worksheet.write('K1', 'cP log10', bold)
+    worksheet.write('H1', 'Médias: cP', bold)
+    worksheet.write('I1', 'Escala logarítmica >>')
+    worksheet.write('J1', 'RPM Log10', bold)
+    worksheet.write('K1', 'cP Log10', bold)
     worksheet.write('L1', 'Intercepto', bold)
-    # worksheet.write_array_formula(f'L2: ', '=INTERCEPT()') continuar daqui, adicionar fórmulas ao programa
     worksheet.write('M1', 'Inclinação', bold)
     worksheet.write('N1', 'Correlação', bold)
     row = 1
@@ -248,12 +231,11 @@ def worksheet_maker(workbook, worksheet_name, **registers):
                 worksheet.write(row, col + 6, value[0][0]) 
             row += 1
     log_list = logarithm_values_maker(**processed_registers)
-    linear_regression_results = linear_regression_values(*log_list)
     worksheet.write_column('J2', log_list[0])
     worksheet.write_column('K2', log_list[1])
-    worksheet.write('L2', linear_regression_results[1])
-    worksheet.write('M2', linear_regression_results[2])
-    worksheet.write('N2', linear_regression_results[0])
+    worksheet.write_array_formula('L2:L2', '{=INTERCEPT(K2:K20, J2:J20)}')
+    worksheet.write_array_formula('M2:M2', '{=SLOPE(K2:K20, J2:J20)}')
+    worksheet.write_array_formula('N2:N2', '{=RSQ(J2:J20, K2:K20)}')
 
     chart_1 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
     chart_1.add_series({
@@ -271,8 +253,8 @@ def worksheet_maker(workbook, worksheet_name, **registers):
         'name_font': {'size': 14, 'bold': True},
     })
     chart_1.set_size({
-        'width': 600, 
-        'height': 520
+        'width': 500, 
+        'height': 400
     })
     worksheet.insert_chart(row + 2, 4, chart_1)
 
@@ -280,9 +262,19 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     chart_2.add_series({
         'categories': f'={worksheet_name.replace(" ", "")}!$J$2:$J${len(processed_registers.keys()) + 1}',
         'values': f'={worksheet_name.replace(" ", "")}!$K$2:$K${len(processed_registers.values()) + 1}',
-        'line': {'color': 'blue'}
+        'line': {'color': 'blue'},
+        'trendline': {
+            'type': 'linear',
+            'display_equation': True,
+            'display_r_squared': True,
+            'line': {
+                'color': 'red',
+                'width': 1,
+                'dash_type': 'long_dash',
+            },
+        },
     })
-    chart_2.set_title({'name': f'log10 {worksheet_name}'})
+    chart_2.set_title({'name': f'Curva escala log: {worksheet_name}'})
     chart_2.set_x_axis({
         'name': 'RPM',
         'name_font': {'size': 14, 'bold': True},
@@ -292,8 +284,8 @@ def worksheet_maker(workbook, worksheet_name, **registers):
         'name_font': {'size': 14, 'bold': True},
     })
     chart_2.set_size({
-        'width': 600,
-        'height': 520
+        'width': 500,
+        'height': 400
     })
     worksheet.insert_chart(row + 2, 9, chart_2)
 
@@ -364,7 +356,8 @@ while repeat_option != 'N':
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
-    while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
+    while not regex_repeat.search(repeat_option): 
+        print('Responda com "S" para se sim ou "N" para se não')
         repeat_option = str(input('[S/N]: ')).strip().upper()
         if repeat_option == 'S':
             print('Pressione ' + Fore.GREEN + 'START')
