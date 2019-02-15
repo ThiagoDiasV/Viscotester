@@ -364,18 +364,12 @@ while repeat_option != 'N':
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
     print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
-    try:
-        while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
-            repeat_option = str(input('[S/N]: ')).strip().upper()[0]
-            if repeat_option == 'S':
-                print('Pressione ' + Fore.GREEN + 'START')
-                sleep(5)
-    except IndexError: 
-        while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
-            repeat_option = str(input('[S/N]: ')).strip().upper()[0]
-            if repeat_option == 'S':
-                print('Pressione ' + Fore.GREEN + 'START')
-                sleep(5)
+    while not regex_repeat.search(repeat_option): # melhorar aqui com funções, ainda tá dando IndexError
+        repeat_option = str(input('[S/N]: ')).strip().upper()
+        if repeat_option == 'S':
+            print('Pressione ' + Fore.GREEN + 'START')
+            sleep(5)
+
 
 workbook_close_function(workbook)
 workbook_launcher(workbook) 
