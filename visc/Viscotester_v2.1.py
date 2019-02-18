@@ -20,15 +20,22 @@ def initial_menu():
     '''
 
     print(Fore.GREEN + '-' * 90)
-    print(Fore.BLUE + '#' * 37 + Fore.CYAN + ' VISCOTESTER 6L ' + Style.RESET_ALL  + Fore.BLUE + '#' * 37)
-    print(Fore.BLUE + '#' * 35 + Fore.CYAN + ' INSTRUÇÕES DE USO ' + Style.RESET_ALL + Fore.BLUE + '#' * 36)
+    print(Fore.BLUE + '#' * 37 + Fore.CYAN + ' VISCOTESTER 6L '
+          + Style.RESET_ALL + Fore.BLUE + '#' * 37)
+    print(Fore.BLUE + '#' * 35 + Fore.CYAN + ' INSTRUÇÕES DE USO '
+          + Style.RESET_ALL + Fore.BLUE + '#' * 36)
     print(Fore.GREEN + '-' * 90)
-    print('1 - Ligue o aparelho e realize o ' + Fore.BLUE + 'AUTO TEST' , 'pressionando a tecla ' + Fore.GREEN + 'START')
-    print('2 - Observe se não há nenhum fuso acoplado ao aparelho antes de pressionar ' + Fore.GREEN + 'START')
-    print('3 - Aguarde o ' + Fore.BLUE + 'AUTO TEST ' +Style.RESET_ALL + 'ser finalizado e em seguida pressione ' + Fore.GREEN + 'START')
-    print('4 - Adicione o fuso correto e selecione o fuso correto no aparelho pressionando ' + Fore.YELLOW + 'ENTER')
+    print('1 - Ligue o aparelho e realize o ' + Fore.BLUE + 'AUTO TEST',
+          'pressionando a tecla ' + Fore.GREEN + 'START')
+    print('2 - Observe se não há nenhum fuso acoplado ao aparelho antes de '
+          'pressionar ' + Fore.GREEN + 'START')
+    print('3 - Aguarde o ' + Fore.BLUE + 'AUTO TEST ' + Style.RESET_ALL +
+          'ser finalizado e em seguida pressione ' + Fore.GREEN + 'START')
+    print('4 - Adicione o fuso correto e selecione o fuso correto no aparelho '
+          'pressionando ' + Fore.YELLOW + 'ENTER')
     print('5 - Selecione a RPM desejada e pressione ' + Fore.YELLOW + 'ENTER')
-    print('6 - Observe se o fuso correto está acoplado ao aparelho e pressione ' + Fore.GREEN + 'START')
+    print('6 - Observe se o fuso correto está acoplado ao aparelho e '
+          'pressione ' + Fore.GREEN + 'START')
     print(Fore.GREEN + '-' * 90)
     print(Fore.BLUE + '#' * 90)
     print(Fore.BLUE + '#' * 90)
@@ -37,12 +44,14 @@ def initial_menu():
 
 def final_menu():
     '''
-    Prints some informations if the maximum torque is obtained from the Viscotester and require the user to press STOP on the equipment
+    Prints some informations if the maximum torque is obtained from the
+    Viscotester and require the user to press STOP on the equipment
     '''
 
     print('Torque máximo atingido')
     print('Leituras não são mais possíveis de serem feitas')
-    print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho e ' + Fore.GREEN + 'aguarde')
+    print('Pressione ' + Fore.RED + 'STOP' + Style.RESET_ALL +
+          ' no aparelho e ' + Fore.GREEN + 'aguarde')
 
 
 def regex_name_validation(name):
@@ -52,10 +61,13 @@ def regex_name_validation(name):
 
     regexp = re.compile(r'[\\/|<>*:?"]')
     while regexp.search(name):
-        print(Fore.RED + 'Você digitou um caractere não permitido para nome de arquivo.')
-        print(Fore.RED + 'Saiba que você não pode usar nenhum dos caracteres abaixo: ')
+        print(Fore.RED + 'Você digitou um caractere não permitido '
+              'para nome de arquivo.')
+        print(Fore.RED + 'Saiba que você não pode usar nenhum dos '
+              'caracteres abaixo: ')
         print(Fore.RED + r' \ / | < > * : " ?')
-        name = str(input('Digite novamente um nome para a amostra sem caracteres proibidos: '))
+        name = str(input('Digite novamente um nome para a amostra '
+                         'sem caracteres proibidos: '))
     return name
 
 
@@ -64,15 +76,17 @@ def file_name_function():
     Require the name of the sample to put on the xlsx filename
     '''
 
-    file_name = str(input('Digite um nome para o arquivo (.xlsx) será gerado: ')).strip()
+    file_name = str(input('Digite um nome para o arquivo (.xlsx) '
+                          'que será gerado: ')).strip()
     file_name = regex_name_validation(file_name)
     return file_name
 
 
 def serial_object_creator(time_set):
     '''
-    At each rotation of the equipment this function creates a serial object 
-    This is important because at each rotation the timeout to close serial port should change
+    At each rotation of the equipment this function creates a serial object
+    This is important because at each rotation the timeout to close serial
+    port should change
     '''
 
     ser = serial.Serial('COM1', 9600, timeout=time_set)
@@ -82,7 +96,8 @@ def serial_object_creator(time_set):
 
 def timer_for_closing_port(object):
     '''
-    Defines a new time for closing serial port. This times depends on the rotation per minute parameter of equipment
+    Defines a new time for closing serial port. This times depends on
+    the rotation per minute parameter of equipment
     '''
 
     if float(object[3]) <= 6:
@@ -106,12 +121,13 @@ def readings_printer(object):
     Prints the results of the equipment readings on the screen
     '''
 
-    print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} /// Torque: {float(object[5]):.>20}%')
+    print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} '
+          f'/// Torque: {float(object[5]):.>20}%')
 
 
 def values_storager(object):
     '''
-    Storages the readings inside a dict named 'registers' 
+    Storages the readings inside a dict named 'registers'
     '''
 
     if float(object[3]) not in registers.keys():
@@ -128,7 +144,7 @@ def data_processor(**registers):
     '''
 
     for value in registers.values():
-        if len(value[0]) > 1:    
+        if len(value[0]) > 1:
             mean_value = mean(value[0])
             std_value = stdev(value[0])
             if std_value != 0:
@@ -147,9 +163,9 @@ def logarithm_values_maker(**registers):
     cp_list = []
     for value in registers.values():
         cp_list.append(value[0][0])
-    logarithm_list = [[log10(k) for k in registers.keys()], 
-                [log10(v) for v in cp_list]]
-    return logarithm_list 
+    logarithm_list = [[log10(k) for k in registers.keys()],
+                      [log10(v) for v in cp_list]]
+    return logarithm_list
 
 
 def date_storage():
@@ -160,21 +176,32 @@ def date_storage():
     date = datetime.date.today()
     date_today = (date.day, date.month, date.year)
     return date_today
-    
+
 
 def workbook_maker(file_name):
     '''
     This function creates a workbook in format .xlsx
     '''
 
-    date_today = date_storage()    
-    workbook = xlsxwriter.Workbook(f'{file_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')
+    date_today = date_storage()
+    try:
+        workbook = xlsxwriter.Workbook(
+                                'C:/Users/UFC/Desktop/Viscosidades/'
+                                f'{file_name}_{date_today[0]:02d}'
+                                f'{date_today[1]:02d}{date_today[2]:04d}'
+                                '.xlsx')
+    except FileNotFoundError:
+        workbook = xlsxwriter.Workbook(
+                                f'{file_name}_{date_today[0]:02d}'
+                                f'{date_today[1]:02d}{date_today[2]:04d}'
+                                '.xlsx')
     return workbook
 
 
 def worksheet_name_function():
     '''
-    This function records the name of each worksheet using the name of the sample evaluated
+    This function records the name of each worksheet using the name of the
+    sample evaluated
     '''
     sample_name = str(input('Digite o nome da amostra: ')).strip()
     sample_name = regex_name_validation(sample_name)
@@ -183,32 +210,42 @@ def worksheet_name_function():
 
 def worksheet_maker(workbook, worksheet_name, **registers):
     '''
-    This function creates new worksheets inside the created workbook and put the values in columns
-    Inside this function I put a feature to put the processed data in other columns
+    This function creates new worksheets inside the created workbook and put
+    the values in columns
+    Inside this function I put a feature to put the processed data in
+    other columns
     After that, this function creates a chart with the processed data
     '''
 
     worksheet = workbook.add_worksheet(f'{worksheet_name.replace(" ", "")}')
     bold = workbook.add_format({'bold': True})
     italic = workbook.add_format({'italic': True})
-    worksheet.set_column(0, 15, 15)
+    float_format = workbook.add_format({'num_format': '0.0000'})
+    mean_format = workbook.add_format({'num_format': '0.00'})
+    percentage_format = workbook.add_format({'num_format': '0.00%'})
+    worksheet.set_column(0, 15, 16)
     worksheet.set_column(4, 4, 25)
+    worksheet.set_column(9, 9, 20)
     worksheet.write('A1', f'{worksheet_name}', bold)
     worksheet.write('A2', 'Data', italic)
-    date_today = date_storage() 
-    worksheet.write('A3', f'{date_today[0]:02d}/{date_today[1]:02d}/{date_today[2]:04d}')
+    date_today = date_storage()
+    worksheet.write('A3',
+                    f'{date_today[0]:02d}/{date_today[1]:02d}/'
+                    f'{date_today[2]:04d}')
     worksheet.write('B1', 'RPM', bold)
     worksheet.write('C1', 'cP', bold)
     worksheet.write('D1', 'Torque(%)', bold)
     worksheet.write('E1', 'Processamento dos dados >>', bold)
-    worksheet.write('G1', 'RPM', bold)
-    worksheet.write('H1', 'Médias: cP', bold)
-    worksheet.write('I1', 'Escala logarítmica >>')
-    worksheet.write('J1', 'RPM Log10', bold)
-    worksheet.write('K1', 'cP Log10', bold)
-    worksheet.write('L1', 'Intercepto', bold)
-    worksheet.write('M1', 'Inclinação', bold)
-    worksheet.write('N1', 'Correlação', bold)
+    worksheet.write('F1', 'RPM', bold)
+    worksheet.write('G1', 'Médias: cP', bold)
+    worksheet.write('H1', 'Desvio padrão: cP', bold)
+    worksheet.write('I1', 'DP (%): cP', bold)
+    worksheet.write('J1', 'Escala logarítmica >>', bold)
+    worksheet.write('K1', 'RPM Log10', bold)
+    worksheet.write('L1', 'cP Log10', bold)
+    worksheet.write('M1', 'Intercepto', bold)
+    worksheet.write('N1', 'Inclinação', bold)
+    worksheet.write('O1', 'Correlação', bold)
     row = 1
     col = 1
     for key, value in registers.items():
@@ -223,24 +260,41 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     processed_registers = data_processor(**registers)
     row = col = 1
     for key, value in processed_registers.items():
-        if mean(value[0]) != 0:    
-            worksheet.write(row, col + 5, float(key))
+        if mean(value[0]) != 0:
+            worksheet.write(row, col + 4, float(key))
             if len(value[0]) > 1:
-                worksheet.write(row, col + 6, mean(value[0]))
+                worksheet.write(row, col + 5, mean(value[0]), mean_format)
+                worksheet.write(row, col + 6, stdev(value[0]), float_format)
+                worksheet.write(row, col + 7,
+                                (stdev(value[0])/(mean(value[0]))),
+                                percentage_format)
             else:
-                worksheet.write(row, col + 6, value[0][0]) 
+                worksheet.write(row, col + 5, value[0][0], mean_format)
+                worksheet.write(row, col + 6, 0)
+                worksheet.write(row, col + 7, 0)
             row += 1
     log_list = logarithm_values_maker(**processed_registers)
-    worksheet.write_column('J2', log_list[0])
-    worksheet.write_column('K2', log_list[1])
-    worksheet.write_array_formula('L2:L2', '{=INTERCEPT(K2:K20, J2:J20)}')
-    worksheet.write_array_formula('M2:M2', '{=SLOPE(K2:K20, J2:J20)}')
-    worksheet.write_array_formula('N2:N2', '{=RSQ(J2:J20, K2:K20)}')
+    worksheet.write_column('K2', log_list[0], float_format)
+    worksheet.write_column('L2', log_list[1], float_format)
+    worksheet.write_array_formula(
+                                  'M2:M2', '{=INTERCEPT(L2:L20, K2:K20)}',
+                                  float_format
+                                  )
+    worksheet.write_array_formula(
+                                  'N2:N2', '{=SLOPE(L2:L20, K2:K20)}',
+                                  float_format
+                                  )
+    worksheet.write_array_formula(
+                                  'O2:O2', '{=RSQ(K2:K20, L2:L20)}',
+                                  float_format
+                                  )
 
     chart_1 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
     chart_1.add_series({
-        'categories': f'={worksheet_name.replace(" ", "")}!$G2$:$G${len(processed_registers.keys()) + 1}', 
-        'values': f'={worksheet_name.replace(" ", "")}!$H$2:$H${len(processed_registers.values()) + 1}', 
+        'categories': f'={worksheet_name.replace(" ", "")}'
+                      f'!$F2$:$F${len(processed_registers.keys()) + 1}',
+        'values': f'={worksheet_name.replace(" ", "")}'
+                  f'!$G$2:$G${len(processed_registers.values()) + 1}',
         'line': {'color': 'green'}
         })
     chart_1.set_title({'name': f'{worksheet_name}'})
@@ -253,15 +307,17 @@ def worksheet_maker(workbook, worksheet_name, **registers):
         'name_font': {'size': 14, 'bold': True},
     })
     chart_1.set_size({
-        'width': 500, 
+        'width': 500,
         'height': 400
     })
-    worksheet.insert_chart(row + 2, 4, chart_1)
+    worksheet.insert_chart(row + 2, 5, chart_1)
 
     chart_2 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
     chart_2.add_series({
-        'categories': f'={worksheet_name.replace(" ", "")}!$J$2:$J${len(processed_registers.keys()) + 1}',
-        'values': f'={worksheet_name.replace(" ", "")}!$K$2:$K${len(processed_registers.values()) + 1}',
+        'categories': f'={worksheet_name.replace(" ", "")}'
+                      f'!$K$2:$K${len(processed_registers.keys()) + 1}',
+        'values': f'={worksheet_name.replace(" ", "")}'
+                  f'!$L$2:$L${len(processed_registers.values()) + 1}',
         'line': {'color': 'blue'},
         'trendline': {
             'type': 'linear',
@@ -287,7 +343,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
         'width': 500,
         'height': 400
     })
-    worksheet.insert_chart(row + 2, 9, chart_2)
+    worksheet.insert_chart(row + 2, 10, chart_2)
 
 
 def workbook_close_function(workbook):
@@ -303,12 +359,21 @@ def workbook_launcher(workbook):
     A simple function to launch the workbook for user see his results
     '''
 
-    date_today = date_storage()    
-    startfile(f'{file_name}_{date_today[0]:02d}{date_today[1]:02d}{date_today[2]:04d}.xlsx')   
+    date_today = date_storage()
+    try:
+        startfile('C:/Users/UFC/Desktop/Viscosidades/'
+                  f'{file_name}_{date_today[0]:02d}'
+                  f'{date_today[1]:02d}{date_today[2]:04d}'
+                  '.xlsx')
+    except FileNotFoundError:
+        startfile(
+              f'{file_name}_{date_today[0]:02d}'
+              f'{date_today[1]:02d}{date_today[2]:04d}'
+              '.xlsx')
 
 
 initial_menu()
-file_name = file_name_function() 
+file_name = file_name_function()
 workbook = workbook_maker(file_name)
 repeat_option = ''
 regex_repeat = re.compile(r'[NS]')
@@ -318,23 +383,26 @@ while repeat_option != 'N':
     sleep(2.5)
     print('Aguarde que em instantes o programa se inicializará.')
     sleep(2.5)
-    print('Ao finalizar suas leituras, pressione ' + Fore.RED + 'STOP ' + Style.RESET_ALL + 'no aparelho.')
+    print('Ao finalizar suas leituras, pressione ' + Fore.RED + 'STOP '
+          + Style.RESET_ALL + 'no aparelho.')
     sleep(2.5)
-    print('Ao pressionar ' + Fore.RED + 
-          'STOP' + Style.RESET_ALL + 
-          ', o programa levará alguns segundos para preparar sua planilha. Aguarde.') 
-    registers = dict()  # Registros das leituras serão armazenados neste dicionário.
+    print('Ao pressionar ' + Fore.RED +
+          'STOP' + Style.RESET_ALL +
+          ', o programa levará alguns segundos para preparar sua planilha. '
+          'Aguarde.')
+    registers = dict()  # Registros das leituras serão armazenados aqui.
     time = 300  # Tempo para timeout da porta inicial alto para evitar bugs na inicialização do programa.
     sleep(5)  # Tempo de espera para evitar que bugs que o aparelho gera na inicialização possam dar crash no programa.
     print(Fore.GREEN + '-' * 90)
-    print(Fore.BLUE + '#' * 40 + Fore.CYAN + ' LEITURAS ' + Fore.BLUE + '#' * 40)
+    print(Fore.BLUE + '#' * 40 + Fore.CYAN + ' LEITURAS '
+          + Fore.BLUE + '#' * 40)
     print(Fore.GREEN + '-' * 90)
     while True:
         try:
             object = serial_object_creator(time)
             time = timer_for_closing_port(object)
             if torque_validator(object):
-                if object == False:
+                if not object:
                     print('Torque máximo atingido ou erro no aparelho')
                 else:
                     readings_printer(object)
@@ -347,23 +415,33 @@ while repeat_option != 'N':
             break
 
         except IndexError:
-            print('Foi pressionado ' + Fore.RED + 'STOP' + Style.RESET_ALL + ' no aparelho')
+            print('Foi pressionado ' + Fore.RED + 'STOP'
+                  + Style.RESET_ALL + ' no aparelho')
             registers = dict(OrderedDict(sorted(registers.items())))
             break
 
-
-    worksheet_maker(workbook, worksheet_name, **{str(k): v for k , v in registers.items()})
+    worksheet_maker(
+                    workbook, worksheet_name,
+                    **{str(k): v for k, v in registers.items()}
+                    )
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não')
-    print('Se você quiser ler outra amostra,\nresponda após pressionar ' + Fore.GREEN + 'START' + Style.RESET_ALL +  ' no aparelho')
-    while not regex_repeat.search(repeat_option): 
-        print('Responda com "S" para se sim ou "N" para se não')
+    print('Se você quiser ler outra amostra,\nresponda após pressionar '
+          + Fore.GREEN + 'START' + Style.RESET_ALL + ' no aparelho')
+    while not regex_repeat.search(repeat_option):
         repeat_option = str(input('[S/N]: ')).strip().upper()
         if repeat_option == 'S':
             print('Pressione ' + Fore.GREEN + 'START')
             sleep(5)
 
 
-workbook_close_function(workbook)
-workbook_launcher(workbook) 
-print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
+try:
+    workbook_close_function(workbook)
+    workbook_launcher(workbook)
+    print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
+except FileNotFoundError:
+    print('O programa não conseguiu encontrar a pasta "Viscosidades"')
+    print('O caminho seria: ' + Fore.GREEN +
+          '"C:/Users/UFC/Desktop/Viscosidades"')
+    print('Crie uma nova pasta "Viscosidades" no caminho acima')
+    print('Faça sua planilha de forma manual')
