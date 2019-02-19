@@ -36,7 +36,7 @@
  [],
  False,
  False,
- 1550506391,
+ 1550578229,
  [('run.exe',
    'c:\\users\\ufc\\pycharmprojects\\viscotester\\viscotester\\visc\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-32bit\\run.exe',
    'EXECUTABLE')])

@@ -1,6 +1,6 @@
 import re
 from collections import OrderedDict
-from os import startfile
+from os import startfile, path
 from statistics import mean, stdev
 from time import sleep
 import colorama
@@ -184,14 +184,15 @@ def workbook_maker(file_name):
     '''
 
     date_today = date_storage()
-    try:
+    if path.isdir('C:/Users/UFC/Desktop/Viscosidades/'):
         workbook = xlsxwriter.Workbook(
                                 'C:/Users/UFC/Desktop/Viscosidades/'
                                 f'{file_name}_{date_today[0]:02d}'
                                 f'{date_today[1]:02d}{date_today[2]:04d}'
                                 '.xlsx')
-    except FileNotFoundError:
+    else:
         workbook = xlsxwriter.Workbook(
+                                'C:/Users/UFC/Desktop/'
                                 f'{file_name}_{date_today[0]:02d}'
                                 f'{date_today[1]:02d}{date_today[2]:04d}'
                                 '.xlsx')
@@ -360,16 +361,16 @@ def workbook_launcher(workbook):
     '''
 
     date_today = date_storage()
-    try:
+    if path.isdir('C:/Users/UFC/Desktop/Viscosidades/'):
         startfile('C:/Users/UFC/Desktop/Viscosidades/'
                   f'{file_name}_{date_today[0]:02d}'
                   f'{date_today[1]:02d}{date_today[2]:04d}'
                   '.xlsx')
-    except FileNotFoundError:
-        startfile(
-              f'{file_name}_{date_today[0]:02d}'
-              f'{date_today[1]:02d}{date_today[2]:04d}'
-              '.xlsx')
+    else:
+        startfile('C:/Users/UFC/Desktop/'
+                  f'{file_name}_{date_today[0]:02d}'
+                  f'{date_today[1]:02d}{date_today[2]:04d}'
+                  '.xlsx')
 
 
 initial_menu()
@@ -435,13 +436,6 @@ while repeat_option != 'N':
             sleep(5)
 
 
-try:
-    workbook_close_function(workbook)
-    workbook_launcher(workbook)
-    print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
-except FileNotFoundError:
-    print('O programa não conseguiu encontrar a pasta "Viscosidades"')
-    print('O caminho seria: ' + Fore.GREEN +
-          '"C:/Users/UFC/Desktop/Viscosidades"')
-    print('Crie uma nova pasta "Viscosidades" no caminho acima')
-    print('Faça sua planilha de forma manual')
+workbook_close_function(workbook)
+workbook_launcher(workbook)
+print(Fore.GREEN + 'OBRIGADO POR USAR O VISCOTESTER 6L SCRIPT')
