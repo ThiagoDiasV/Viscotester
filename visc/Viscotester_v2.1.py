@@ -160,11 +160,12 @@ def logarithm_values_maker(**registers):
     '''
 
     registers = {float(k): v for k, v in registers.items()}
-    cp_list = []
+    cp_list = list()
     for value in registers.values():
-        cp_list.append(value[0][0])
-    logarithm_list = [[log10(k) for k in registers.keys()],
-                      [log10(v) for v in cp_list]]
+        cp_list.append(mean(value[0]))
+    for key in registers.keys():
+        logarithm_list = [[log10(k) for k in registers.keys() if mean(registers[k][0]) != 0],
+                          [log10(v) for v in cp_list if v != 0]]
     return logarithm_list
 
 
