@@ -1,3 +1,8 @@
+'''
+Viscotester: a Python script to process data from a 
+viscosimeter Visco Tester 6L Haake. 
+'''
+
 import re
 from collections import OrderedDict
 from os import startfile, path
@@ -16,7 +21,7 @@ colorama.init(autoreset=True, convert=True)
 
 def initial_menu():
     '''
-    Prints an initial menu at the screen
+    Prints an initial menu at the screen.
     '''
 
     print(Fore.GREEN + '-' * 90)
@@ -45,7 +50,7 @@ def initial_menu():
 def final_menu():
     '''
     Prints some informations if the maximum torque is obtained from the
-    Viscotester and require the user to press STOP on the equipment
+    Viscotester and require the user to press STOP on the equipment.
     '''
 
     print('Torque máximo atingido')
@@ -57,6 +62,7 @@ def final_menu():
 def regex_name_validation(name):
     '''
     Does a validation on sample name and worksheet name using regex
+    to avoid errors on the file that will be created.
     '''
 
     regexp = re.compile(r'[\\/|<>*:?"]')
@@ -73,7 +79,7 @@ def regex_name_validation(name):
 
 def file_name_function():
     '''
-    Require the name of the sample to put on the xlsx filename
+    Require the name of the sample to put on the xlsx filename.
     '''
 
     file_name = str(input('Digite um nome para o arquivo (.xlsx) '
@@ -84,9 +90,10 @@ def file_name_function():
 
 def serial_object_creator(time_set):
     '''
-    At each rotation of the equipment this function creates a serial object
+    At each rotation of the equipment this function creates a serial object.
     This is important because at each rotation the timeout to close serial
-    port should change
+    port should change. This occurs because the time to break the while loop
+    is dependent of the rotation of equipment. 
     '''
 
     ser = serial.Serial('COM1', 9600, timeout=time_set)
@@ -97,7 +104,7 @@ def serial_object_creator(time_set):
 def timer_for_closing_port(object):
     '''
     Defines a new time for closing serial port. This times depends on
-    the rotation per minute parameter of equipment
+    the rotation per minute parameter of equipment.
     '''
 
     if float(object[3]) <= 6:
@@ -110,6 +117,10 @@ def timer_for_closing_port(object):
 
 
 def torque_validator(serial_object):
+    '''
+    Returns a boolean value that depends on the torque of equipment.
+    '''
+    
     if serial_object[7] == b'off':
         return False
     else:
@@ -118,7 +129,7 @@ def torque_validator(serial_object):
 
 def readings_printer(object):
     '''
-    Prints the results of the equipment readings on the screen
+    Prints the results of the equipment readings at the screen.
     '''
 
     print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} '
@@ -127,7 +138,7 @@ def readings_printer(object):
 
 def values_storager(object):
     '''
-    Storages the readings inside a dict named 'registers'
+    Storages the readings inside a dict named 'registers'.
     '''
 
     if float(object[3]) not in registers.keys():
@@ -140,7 +151,7 @@ def values_storager(object):
 
 def data_processor(**registers):
     '''
-    Processes the data of registers to delete outliers
+    Processes the data of registers to delete outliers.
     '''
 
     for value in registers.values():
@@ -156,7 +167,7 @@ def data_processor(**registers):
 
 def logarithm_values_maker(**registers):
     '''
-    Calculates the base-10 logarithm of the processed values
+    Calculates the base-10 logarithm of the processed values.
     '''
 
     registers = {float(k): v for k, v in registers.items()}
@@ -171,7 +182,7 @@ def logarithm_values_maker(**registers):
 
 def date_storage():
     '''
-    A function to create a tuple with the today's date
+    A function to create a tuple with the today's date.
     '''
 
     date = datetime.date.today()
@@ -181,7 +192,7 @@ def date_storage():
 
 def workbook_maker(file_name):
     '''
-    This function creates a workbook in format .xlsx
+    This function creates a workbook in format .xlsx.
     '''
 
     date_today = date_storage()
@@ -203,7 +214,7 @@ def workbook_maker(file_name):
 def worksheet_name_function():
     '''
     This function records the name of each worksheet using the name of the
-    sample evaluated
+    sample evaluated.
     '''
     sample_name = str(input('Digite o nome da amostra: ')).strip()
     sample_name = regex_name_validation(sample_name)
@@ -213,10 +224,10 @@ def worksheet_name_function():
 def worksheet_maker(workbook, worksheet_name, **registers):
     '''
     This function creates new worksheets inside the created workbook and put
-    the values in columns
+    the values in columns.
     Inside this function I put a feature to put the processed data in
-    other columns
-    After that, this function creates a chart with the processed data
+    other columns.
+    After that, this function creates two charts with the processed data.
     '''
 
     worksheet = workbook.add_worksheet(f'{worksheet_name.replace(" ", "")}')
@@ -250,6 +261,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     worksheet.write('O1', 'Correlação', bold)
     row = 1
     col = 1
+    # the for loop below puts the read values inside .xlsx cells. 
     for key, value in registers.items():
         for cp in value[0]:
             worksheet.write(row, col, float(key))
@@ -261,6 +273,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
             row += 1
     processed_registers = data_processor(**registers)
     row = col = 1
+    # the for loop below puts the processed values inside .xlsx cells.
     for key, value in processed_registers.items():
         if mean(value[0]) != 0:
             worksheet.write(row, col + 4, float(key))
@@ -276,6 +289,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
                 worksheet.write(row, col + 7, 0)
             row += 1
     log_list = logarithm_values_maker(**processed_registers)
+    # the write_column() function below puts the log10 values inside .xlsx cells.
     worksheet.write_column('K2', log_list[0], float_format)
     worksheet.write_column('L2', log_list[1], float_format)
     worksheet.write_array_formula(
@@ -358,7 +372,7 @@ def workbook_close_function(workbook):
 
 def workbook_launcher(workbook):
     '''
-    A simple function to launch the workbook for user see his results
+    A simple function to launch the workbook for user to see his results.
     '''
 
     date_today = date_storage()
@@ -374,7 +388,7 @@ def workbook_launcher(workbook):
                   '.xlsx')
 
 
-initial_menu()
+initial_menu() 
 file_name = file_name_function()
 workbook = workbook_maker(file_name)
 repeat_option = ''
@@ -392,9 +406,9 @@ while repeat_option != 'N':
           'STOP' + Style.RESET_ALL +
           ', o programa levará alguns segundos para preparar sua planilha. '
           'Aguarde.')
-    registers = dict()  # Registros das leituras serão armazenados aqui.
-    time = 300  # Tempo para timeout da porta inicial alto para evitar bugs na inicialização do programa.
-    sleep(5)  # Tempo de espera para evitar que bugs que o aparelho gera na inicialização possam dar crash no programa.
+    registers = dict()  # The registered values will be stored inside this dict.
+    time = 300  # First timeout value. This will change after the first rotation.
+    sleep(5)  # A single sleep to delay the beginning of the script. This helps to avoid errors.
     print(Fore.GREEN + '-' * 90)
     print(Fore.BLUE + '#' * 40 + Fore.CYAN + ' LEITURAS '
           + Fore.BLUE + '#' * 40)
@@ -416,7 +430,7 @@ while repeat_option != 'N':
             print('Programa interrompido por atalho de teclado')
             break
 
-        except IndexError:
+        except IndexError: # This exception finishes the loop.
             print('Foi pressionado ' + Fore.RED + 'STOP'
                   + Style.RESET_ALL + ' no aparelho')
             registers = dict(OrderedDict(sorted(registers.items())))
