@@ -122,7 +122,7 @@ def serial_object_creator(time_set):
     parameter is equal to 'time_set' variable. The variable 'time_set' is
     defined in timer_for_closing_port() function below.
     Of 'serial_object', index [3] is the RPM value, index [5] is the torque
-    values and the index [7] are the viscosity (cP) values.
+    value and the index [7] is the viscosity (cP) value.
     '''
 
     ser = serial.Serial('COM1', 9600, timeout=time_set)
