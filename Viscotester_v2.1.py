@@ -1,5 +1,5 @@
 '''
-Viscotester: a Python script to process data from a viscosimeter 
+Viscotester: a Python script to process data from a viscosimeter
 Visco Tester 6L Haake.
 
 The documentation is in English but the program is used in a Brazilian
