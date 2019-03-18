@@ -1,4 +1,5 @@
-('C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester\\build\\Viscotester_v2.1\\PKG-00.pkg',
+('C:\\Users\\UFC\\PycharmProjects\\Viscotester '
+ 'new\\Viscotester\\build\\Viscotester_v2.1\\PKG-00.pkg',
  {'BINARY': 1,
   'DATA': 1,
   'EXECUTABLE': 1,
@@ -7,7 +8,8 @@
   'PYSOURCE': 1,
   'PYZ': 0},
  [('PYZ-00.pyz',
-   'C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester\\build\\Viscotester_v2.1\\PYZ-00.pyz',
+   'C:\\Users\\UFC\\PycharmProjects\\Viscotester '
+   'new\\Viscotester\\build\\Viscotester_v2.1\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
    'C:\\Users\\UFC\\AppData\\Local\\Programs\\Python\\Python36-32\\lib\\struct.pyo',
@@ -25,10 +27,12 @@
    'c:\\users\\ufc\\pycharmprojects\\viscotester\\viscotester\\visc\\lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
    'PYSOURCE'),
   ('Viscotester_v2.1',
-   'C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester\\Viscotester_v2.1.py',
+   'C:\\Users\\UFC\\PycharmProjects\\Viscotester '
+   'new\\Viscotester\\Viscotester_v2.1.py',
    'PYSOURCE'),
   ('Viscotester_v2.1.exe.manifest',
-   'C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester\\build\\Viscotester_v2.1\\Viscotester_v2.1.exe.manifest',
+   'C:\\Users\\UFC\\PycharmProjects\\Viscotester '
+   'new\\Viscotester\\build\\Viscotester_v2.1\\Viscotester_v2.1.exe.manifest',
    'BINARY')],
  True,
  False,

@@ -1,8 +1,23 @@
 '''
-Viscotester: a Python script to process data from a 
-viscosimeter Visco Tester 6L Haake. 
+Viscotester: a Python script to process data from a viscosimeter Visco
+Tester 6L Haake.
+
+The documentation is in English but the program is used in a Brazilian
+laboratory, so the language of the prints is Portuguese-BR.
+
+This program is made specifically for Visco Tester 6l Haake and Windows OS.
+
+A viscosimeter is a equipment used to measure the viscosity of liquids and
+fluids. The equipment use tools named spindles. The spindle is immersed
+in the substance that will be evaluated and is rotated at different
+rotations.
+
+The output of equipment are the rotation per minute (RPM) parameter,
+the viscosity (cP) and the torque (%) value. The torque value is calculated
+based on the speed and the geometry of the spindle.
 '''
 
+# Imports
 import re
 from collections import OrderedDict
 from os import startfile, path
@@ -63,6 +78,10 @@ def regex_name_validation(name):
     '''
     Does a validation on sample name and worksheet name using regex
     to avoid errors on the file that will be created.
+    The input is the name that the user typed to the program.
+    The function repeats the requirement of the name if the user used
+    forbidden characters (like \\/|<>*:?").
+    Returns the name that will be used.
     '''
 
     regexp = re.compile(r'[\\/|<>*:?"]')
@@ -80,6 +99,7 @@ def regex_name_validation(name):
 def file_name_function():
     '''
     Require the name of the sample to put on the xlsx filename.
+    The regex_name_validation() function is used here to avoid errors.
     '''
 
     file_name = str(input('Digite um nome para o arquivo (.xlsx) '
@@ -93,18 +113,42 @@ def serial_object_creator(time_set):
     At each rotation of the equipment this function creates a serial object.
     This is important because at each rotation the timeout to close serial
     port should change. This occurs because the time to break the while loop
-    is dependent of the rotation of equipment. 
+    is dependent of the rotation of equipment.
+    The time to closing port responsibility is assigned to 'time_set'
+    variable.
+    The data of serial port will be assigned to 'ser' variable.
+    The class serial.Serial receive 'COM1' as port parameter because this
+    program is used on Windows OS. Baudrate parameter is 9600 and timeout
+    parameter is equal to 'time_set' variable. The variable 'time_set' is
+    defined in timer_for_closing_port() function below.
+    In the index [3] are the RPM values, index [5] are the torque values
+    and the index [7] are the viscosity (cP) values.
     '''
 
     ser = serial.Serial('COM1', 9600, timeout=time_set)
     serial_object = ser.readline().split()
+
     return serial_object
 
 
 def timer_for_closing_port(object):
     '''
-    Defines a new time for closing serial port. This times depends on
-    the rotation per minute parameter of equipment.
+    Defines a new time for closing serial port. This times depends on the
+    rotation per minute parameter of equipment.
+    The possible values for rotation per minute parameter of the equipment
+    are: 0.3, 0.5, 0.6, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 10, 12, 20, 30, 50, 60,
+    100 and 200 RPMs.
+    When the rotation per minute (RPM) parameter of equipment is lower than
+    6 RPMs, the 'time_for_closing' value is defined by the 'if' statement
+    below.
+    If the value of RPM is above 6 and below 100, 'time_for_closing' value
+    is defined by the 'elif' statement. Finally, if the RPM value is 100
+    or 200 RPMs, 'time_for_closing' value is defined by 'else' statement.
+    These differences on calculation of 'time_for_closing' variable occurs
+    because this variable is responsible to finish the loop that controls
+    the program, and at high rotations the probability of errors increase.
+    The 'float(object[3])' value below is the RPM parameter. 'float' function
+    is necessary because the equipment send to the computer bytes literals.
     '''
 
     if float(object[3]) <= 6:
@@ -120,7 +164,7 @@ def torque_validator(serial_object):
     '''
     Returns a boolean value that depends on the torque of equipment.
     '''
-    
+
     if serial_object[7] == b'off':
         return False
     else:
@@ -130,6 +174,8 @@ def torque_validator(serial_object):
 def readings_printer(object):
     '''
     Prints the results of the equipment readings at the screen.
+    As said before, the indexes 3, 5 and 7 represents the RPM
+    values, the torque values and the cP values respectively.
     '''
 
     print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} '
@@ -139,6 +185,12 @@ def readings_printer(object):
 def values_storager(object):
     '''
     Storages the readings inside a dict named 'registers'.
+    The keys are the RPM values. The values are two lists, the first
+    list receives the cP values and the second list receives the torque
+    values. Each key have two lists representing cP and torque values.
+    The 'object' parameter is the serial_object of serial_object_creator()
+    function.
+    The return is the dict registers with new values.
     '''
 
     if float(object[3]) not in registers.keys():
@@ -151,7 +203,11 @@ def values_storager(object):
 
 def data_processor(**registers):
     '''
-    Processes the data of registers to delete outliers.
+    Processes the data of registers dict to delete outliers.
+    The cutoff parameter are (average - standard deviation) and
+    (average + standard deviation).
+    A for loop perform iteration on values of registers dict and exclude
+    outliers.
     '''
 
     for value in registers.values():
@@ -168,6 +224,16 @@ def data_processor(**registers):
 def logarithm_values_maker(**registers):
     '''
     Calculates the base-10 logarithm of the processed values.
+    The dict comprehension below is only to transform RPM values
+    in float types again, because the **kwargs only accept string
+    type as keys, and is necessary that RPM values are float type,
+    not string.
+    A new list (cp_list) is created to receive the cP values.
+    A iteration is made on keys of registers dict using for loop
+    to make a list with two lists inside of it. The first list
+    will store the base-10 logarithm values of RPM values. The second
+    list will store the base-10 logarithm values of cP values.
+    This function returns this logarithm_list.
     '''
 
     registers = {float(k): v for k, v in registers.items()}
@@ -175,7 +241,8 @@ def logarithm_values_maker(**registers):
     for value in registers.values():
         cp_list.append(mean(value[0]))
     for key in registers.keys():
-        logarithm_list = [[log10(k) for k in registers.keys() if mean(registers[k][0]) != 0],
+        logarithm_list = [[log10(k) for k in registers.keys()
+                           if mean(registers[k][0]) != 0],
                           [log10(v) for v in cp_list if v != 0]]
     return logarithm_list
 
@@ -183,6 +250,8 @@ def logarithm_values_maker(**registers):
 def date_storage():
     '''
     A function to create a tuple with the today's date.
+    This date will be in one cell of the workbook that
+    will be created and in the name of the xlsx file.
     '''
 
     date = datetime.date.today()
@@ -192,7 +261,9 @@ def date_storage():
 
 def workbook_maker(file_name):
     '''
-    This function creates a workbook in format .xlsx.
+    This function creates a workbook in format .xlsx. and returns it.
+    The else statement below is because if some user delete the folder
+    'Viscosidades', the workbooks will be saved on Desktop.
     '''
 
     date_today = date_storage()
@@ -225,9 +296,19 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     '''
     This function creates new worksheets inside the created workbook and put
     the values in columns.
-    Inside this function I put a feature to put the processed data in
-    other columns.
-    After that, this function creates two charts with the processed data.
+    In each worksheet:
+    Column 'A' will store the sample name and the date.
+    Columns 'B', 'C', and 'D' will store all read data (RPM, cP and Torque
+    values).
+    Columns 'F', 'G', 'H', and 'I' will store the processed data, without
+    outliers, respectively: RPM, average cP, standard deviation and relative
+    standard deviation.
+    Columns 'K' and 'L' will receive log10 values of processed RPM and cP
+    values.
+    Finally, in columns 'M', 'N' and 'O', the cells 'M2', 'N2' and 'O2' will
+    receive intercept, slope and R squared values of log10 values.
+    Each worksheet will have two charts, one for processed data and other for
+    log10 data.
     '''
 
     worksheet = workbook.add_worksheet(f'{worksheet_name.replace(" ", "")}')
@@ -258,10 +339,14 @@ def worksheet_maker(workbook, worksheet_name, **registers):
     worksheet.write('L1', 'cP Log10', bold)
     worksheet.write('M1', 'Intercepto', bold)
     worksheet.write('N1', 'Inclinação', bold)
-    worksheet.write('O1', 'Correlação', bold)
+    worksheet.write('O1', 'R²', bold)
+
+    # The for loop below puts the read values inside .xlsx cells.
+    # RPM, cP and torque values will be stored on cols 1, 2 and 3.
+
     row = 1
     col = 1
-    # the for loop below puts the read values inside .xlsx cells. 
+
     for key, value in registers.items():
         for cp in value[0]:
             worksheet.write(row, col, float(key))
@@ -272,8 +357,11 @@ def worksheet_maker(workbook, worksheet_name, **registers):
             worksheet.write(row, col + 2, torque)
             row += 1
     processed_registers = data_processor(**registers)
+
+    # The for loop below puts the processed values inside .xlsx cells.
+    # RPM, mean(cP), stdev and stdev% will be stored on cols 5, 6, 7 and 8.
+
     row = col = 1
-    # the for loop below puts the processed values inside .xlsx cells.
     for key, value in processed_registers.items():
         if mean(value[0]) != 0:
             worksheet.write(row, col + 4, float(key))
@@ -288,8 +376,11 @@ def worksheet_maker(workbook, worksheet_name, **registers):
                 worksheet.write(row, col + 6, 0)
                 worksheet.write(row, col + 7, 0)
             row += 1
+
     log_list = logarithm_values_maker(**processed_registers)
-    # the write_column() function below puts the log10 values inside .xlsx cells.
+
+    # write_column() function below puts the log10 values inside .xlsx cells.
+
     worksheet.write_column('K2', log_list[0], float_format)
     worksheet.write_column('L2', log_list[1], float_format)
     worksheet.write_array_formula(
@@ -364,7 +455,7 @@ def worksheet_maker(workbook, worksheet_name, **registers):
 
 def workbook_close_function(workbook):
     '''
-    A simple function to close the created workbook
+    A simple function to close the created workbook.
     '''
 
     workbook.close()
@@ -388,7 +479,8 @@ def workbook_launcher(workbook):
                   '.xlsx')
 
 
-initial_menu() 
+# Init.
+initial_menu()
 file_name = file_name_function()
 workbook = workbook_maker(file_name)
 repeat_option = ''
@@ -406,9 +498,9 @@ while repeat_option != 'N':
           'STOP' + Style.RESET_ALL +
           ', o programa levará alguns segundos para preparar sua planilha. '
           'Aguarde.')
-    registers = dict()  # The registered values will be stored inside this dict.
-    time = 300  # First timeout value. This will change after the first rotation.
-    sleep(5)  # A single sleep to delay the beginning of the script. This helps to avoid errors.
+    registers = dict()  # The registered values will be stored in this dict.
+    time = 300  # First timeout value. Will change after the first rotation.
+    sleep(5)  # Delay the beginning of the script. This helps to avoid errors.
     print(Fore.GREEN + '-' * 90)
     print(Fore.BLUE + '#' * 40 + Fore.CYAN + ' LEITURAS '
           + Fore.BLUE + '#' * 40)
@@ -430,7 +522,7 @@ while repeat_option != 'N':
             print('Programa interrompido por atalho de teclado')
             break
 
-        except IndexError: # This exception finishes the loop.
+        except IndexError:  # This exception finishes the loop.
             print('Foi pressionado ' + Fore.RED + 'STOP'
                   + Style.RESET_ALL + ' no aparelho')
             registers = dict(OrderedDict(sorted(registers.items())))

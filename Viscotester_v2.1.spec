@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['Viscotester_v2.1.py'],
-             pathex=['C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester'],
+             pathex=['C:\\Users\\UFC\\PycharmProjects\\Viscotester new\\Viscotester'],
              binaries=[],
              datas=[],
              hiddenimports=[],
