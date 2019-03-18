@@ -121,8 +121,8 @@ def serial_object_creator(time_set):
     program is used on Windows OS. Baudrate parameter is 9600 and timeout
     parameter is equal to 'time_set' variable. The variable 'time_set' is
     defined in timer_for_closing_port() function below.
-    In the index [3] are the RPM values, index [5] are the torque values
-    and the index [7] are the viscosity (cP) values.
+    Of 'serial_object', index [3] is the RPM value, index [5] is the torque
+    values and the index [7] are the viscosity (cP) values.
     '''
 
     ser = serial.Serial('COM1', 9600, timeout=time_set)
