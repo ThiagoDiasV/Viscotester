@@ -1,0 +1,6 @@
+# Distribution / packaging
+build/
+dist/
+visc/
+.vscode/
+Viscotester_v2.1.spec
