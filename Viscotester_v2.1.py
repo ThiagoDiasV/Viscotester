@@ -131,7 +131,7 @@ def serial_object_creator(time_set):
     return serial_object
 
 
-def timer_for_closing_port(object):
+def timer_for_closing_port(serial_object):
     '''
     Defines a new time for closing serial port. This times depends on the
     rotation per minute parameter of equipment.
@@ -151,12 +151,14 @@ def timer_for_closing_port(object):
     is necessary because the equipment send to the computer bytes literals.
     '''
 
-    if float(object[3]) <= 6:
-        time_for_closing = 2.5*(60/float(object[3]))
-    elif float(object[3]) < 100:
-        time_for_closing = 3.5*(60/float(object[3]))
+    rpm_value = float(serial_object[3])
+
+    if rpm_value <= 6:
+        time_for_closing = 2.5*(60/rpm_value)
+    elif rpm_value < 100:
+        time_for_closing = 3.5*(60/rpm_value)
     else:
-        time_for_closing = 25*(60/float(object[3]))
+        time_for_closing = 25*(60/rpm_value)
     return time_for_closing
 
 
@@ -165,24 +167,32 @@ def torque_validator(serial_object):
     Returns a boolean value that depends on the torque of equipment.
     '''
 
-    if serial_object[7] == b'off':
+    cp_value = serial_object[7]
+
+    if cp_value == b'off':
         return False
     else:
         return True
 
 
-def readings_printer(object):
+def readings_printer(serial_object):
     '''
     Prints the results of the equipment readings at the screen.
     As said before, the indexes 3, 5 and 7 represents the RPM
     values, the torque values and the cP values respectively.
     '''
 
-    print(f' RPM: {float(object[3]):.>20} /// cP: {int(object[7]):.>20} '
-          f'/// Torque: {float(object[5]):.>20}%')
+    rpm_value, cp_value, torque_value = (
+                                         float(serial_object[3]), 
+                                         int(serial_object[7]), 
+                                         float(serial_object[5])
+                                         )
+
+    print(f' RPM: {rpm_value:.>20} /// cP: {cp_value:.>20} '
+          f'/// Torque: {torque_value:.>20}%')
 
 
-def values_storager(object):
+def values_storager(serial_object):
     '''
     Storages the readings inside a dict named 'registers'.
     The keys are the RPM values. The values are two lists, the first
@@ -193,11 +203,17 @@ def values_storager(object):
     The return is the dict registers with new values.
     '''
 
-    if float(object[3]) not in registers.keys():
-        registers[float(object[3])] = [[int(object[7])], [float(object[5])]]
-    elif float(object[3]) in registers.keys():
-        registers[float(object[3])][0].append(int(object[7]))
-        registers[float(object[3])][1].append(float(object[5]))
+    rpm_value, cp_value, torque_value = (
+                                         float(serial_object[3]), 
+                                         int(serial_object[7]), 
+                                         float(serial_object[5])
+                                         )
+
+    if rpm_value not in registers.keys():
+        registers[rpm_value] = [[cp_value], [torque_value]]
+    elif rpm_value in registers.keys():
+        registers[rpm_value][0].append(cp_value)
+        registers[rpm_value][1].append(torque_value)
     return registers
 
 
