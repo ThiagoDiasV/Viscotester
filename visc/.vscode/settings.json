@@ -1,7 +1,0 @@
-{
-    "python.pythonPath": "C:\\Users\\UFC\\PycharmProjects\\Viscotester\\Viscotester\\visc\\Scripts\\python.exe",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": false,
-    "git.ignoreLimitWarning": true,
-    "python.linting.pylamaEnabled": true
-}
