@@ -84,13 +84,13 @@ def regex_name_validation(name):
     Returns the name that will be used.
     '''
 
-    regexp = re.compile(r'[\\/|<>*:?"]')
+    regexp = re.compile(r'[\\/|<>*:?\"[\]]')
     while regexp.search(name):
         print(Fore.RED + 'Você digitou um caractere não permitido '
-              'para nome de arquivo.')
+              'para nome de arquivo ou de planilha.')
         print(Fore.RED + 'Saiba que você não pode usar nenhum dos '
               'caracteres abaixo: ')
-        print(Fore.RED + r' \ / | < > * : " ?')
+        print(Fore.RED + r' [ ] \  / | < > * : " ?')
         name = str(input('Digite novamente um nome para a amostra '
                          'sem caracteres proibidos: '))
     return name
@@ -549,9 +549,10 @@ while repeat_option != 'N':
                     **{str(k): v for k, v in registers.items()}
                     )
     print('Você quer ler outra amostra?')
-    print('Responda com "S" para se sim ou "N" para se não')
-    print('Se você quiser ler outra amostra,\nresponda após pressionar '
-          + Fore.GREEN + 'START' + Style.RESET_ALL + ' no aparelho')
+    print('Responda com "S" para se sim ou "N" para se não.')
+    print('Se você quiser ler outra amostra, coloque a nova amostra, retire e limpe o fuso e,')
+    print('após isso, responda abaixo após pressionar '
+          + Fore.GREEN + 'START' + Style.RESET_ALL + ' no aparelho:')
     while not regex_repeat.search(repeat_option):
         repeat_option = str(input('[S/N]: ')).strip().upper()
         if repeat_option == 'S':
