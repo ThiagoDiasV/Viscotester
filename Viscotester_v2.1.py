@@ -550,8 +550,8 @@ while repeat_option != 'N':
                     )
     print('Você quer ler outra amostra?')
     print('Responda com "S" para se sim ou "N" para se não.')
-    print('Se você quiser ler outra amostra, coloque a nova amostra, retire')
-    print('e limpe o fuso e, após isso,')
+    print('Se você quiser ler outra amostra, coloque a nova amostra,')
+    print('retire e limpe o fuso e, após isso,')
     print('responda abaixo após pressionar '
           + Fore.GREEN + 'START' + Style.RESET_ALL + ' no aparelho:')
     while not regex_repeat.search(repeat_option):
