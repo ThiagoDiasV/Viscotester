@@ -11,4 +11,4 @@ A script using pyserial library to receive, process and create a workbook with t
 ![image](https://user-images.githubusercontent.com/42140919/54149030-1b537600-4414-11e9-9d2d-44d25d3f7bd0.png)
 
 ## TODO
-- [ ] Create a GUI
+- [ ] Create a GUI (in development)
