@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import filedialog
 import threading
@@ -11,30 +11,40 @@ from statistics import mean, stdev
 import xlsxwriter
 import datetime
 from math import log10
-import PIL.Image 
+import PIL.Image
 import PIL.ImageTk
 
 
 class PrintResults(logging.Handler):
 
     def __init__(self, text):
+        """
+        Initializes the class that prints the results
+        on the tkinter GUI screen.
+        """
         super().__init__()
         self.text = text
 
     def emit(self, record):
+        """
+        Records the message on variable 'msg'.
+        """
         msg = self.format(record)
 
         def append_text():
             self.text.configure(state='normal')
-            self.text.insert(END, f'{msg}\n')
+            self.text.insert(tk.END, f'{msg}\n')
             self.text.configure(state='disabled')
-            self.text.yview(END)
+            self.text.yview(tk.END)
         self.text.after(0, append_text)
 
 
-class Gui(Frame):
+class Gui(tk.Frame):
 
     def __init__(self, master):
+        """
+        Creates the GUI of Viscotester.
+        """
         super().__init__()
         self.master = master
         self.master.title('Viscotester')
@@ -45,30 +55,32 @@ class Gui(Frame):
         self.grid_columnconfigure(2, weight=1)
         self.grid_columnconfigure(3, weight=1)
 
-        self.main_title = Label(
+        self.main_title = tk.Label(
                                 self,
                                 text='Viscotester 6L HAAKE 3.0',
                                 font=('Helvetica', 24)
                                 )
         self.main_title.grid(column=0, row=0, sticky='ew', columnspan=4)
 
-        self.img = PIL.ImageTk.PhotoImage(PIL.Image.open('Viscotester/panel_photo.jpg'))
-        self.panel = Label(self, image=self.img)
+        self.img = PIL.ImageTk.PhotoImage(PIL.Image.open(
+                            'Viscotester/panel_photo.jpg')
+                            )
+        self.panel = tk.Label(self, image=self.img)
         self.panel.grid(column=0, row=1, sticky='ew', columnspan=4)
 
-        self.filename_text = Label(self, text='Nome do arquivo')
+        self.filename_text = tk.Label(self, text='Nome do arquivo')
         self.filename_text.grid(column=0, row=2)
-        self.filename = Entry(self, text='Nome do arquivo', width=40)
+        self.filename = tk.Entry(self, text='Nome do arquivo', width=40)
         self.filename.grid(column=0, row=3)
 
-        self.init_button = Button(
+        self.init_button = tk.Button(
                                   self,
                                   text="Iniciar análise", width=28,
                                   command=self.initialize_viscotester_readings
                                   )
         self.init_button.grid(column=1, row=2)
 
-        self.stop_analysis = Button(
+        self.stop_analysis = tk.Button(
                                     self,
                                     text="Parar análise",
                                     width=28,
@@ -76,7 +88,7 @@ class Gui(Frame):
                                     )
         self.stop_analysis.grid(column=1, row=3)
 
-        self.save_workbook = Button(
+        self.save_workbook = tk.Button(
                                     self, 
                                     text="Salvar análise e abrir planilha", 
                                     width=28,
@@ -84,7 +96,7 @@ class Gui(Frame):
                                     )
         self.save_workbook.grid(column=2, row=2)
 
-        self.open_another_workbook = Button(
+        self.open_another_workbook = tk.Button(
                                       self,
                                       text="Abrir outra planilha",
                                       width=28,
@@ -98,22 +110,39 @@ class Gui(Frame):
 
         text_handler = PrintResults(st)
 
-        logging.basicConfig(filename='test.log',
+        logging.basicConfig(filename=f'Viscotester/{self.filename.get()}.log',
                             level=logging.INFO,
                             format='%(asctime)s - %(message)s')
         logger = logging.getLogger()
         logger.addHandler(text_handler)
 
     def initialize_viscotester_readings(self):
+        """
+        Change the active_status property of an instance of
+        Viscotester class to True, initializing the readings
+        and the recording of data.
+        """
         viscotester.active_status = True
 
     def stop_analysis(self):
+        """
+        Change the active_status property of an instance of
+        Viscotester class to False, stopping the readings
+        and the recording of data.
+        """
         viscotester.active_status = False
 
     def save_workbook(self):
+        """
+        Creates an instance of Results_Workbook class,
+        which will create a workbook to the recorded data.
+        """
         Results_Workbook(self.filename)
 
     def launch_workbook(self):
+        """
+        Allows the user to open any workbook on his computer.
+        """
         another_workbook = filedialog.askopenfile().name
         startfile(another_workbook)
 
@@ -121,6 +150,12 @@ class Gui(Frame):
 class Viscotester:
 
     def __init__(self):
+        """
+        Initialize an instance of Viscotester class, but the
+        default active_status is False. The readings will only
+        appear on screen of the GUI when the active_status will
+        set to True.
+        """
         self._thread = threading.Thread(target=self.job)
         self._stop_threads = threading.Event()
         self._active_status = False
@@ -185,7 +220,9 @@ class Viscotester:
 
 class Results_Workbook:
     def __init__(self, filename):
-        self.file_name = self.check_filename(gui.filename.get().replace(' ', ''))
+        self.file_name = self.check_filename(
+                        gui.filename.get().replace(' ', '')
+                        )
         self.workbook_name = self.set_workbook_name_path(self.file_name)
 
         self.workbook = xlsxwriter.Workbook(self.workbook_name)
@@ -362,7 +399,7 @@ class Results_Workbook:
                     self.worksheet.write(self.row, self.col + 5, value[0][0], self.mean_format)
                     self.worksheet.write(self.row, self.col + 6, 0)
                     self.worksheet.write(self.row, self.col + 7, 0)
-                row += 1
+                self.row += 1
 
         self.log_list = self.logarithm_values_maker(**self.processed_registers)
 
@@ -442,7 +479,7 @@ class Results_Workbook:
 
 if __name__ == '__main__':
 
-    root = Tk()
+    root = tk.Tk()
     root.resizable(0, 0)
     viscotester = Viscotester()
     gui = Gui(root)

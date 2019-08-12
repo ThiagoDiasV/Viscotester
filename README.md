@@ -12,3 +12,5 @@ A script using pyserial library to receive, process and create a workbook with t
 
 ## TODO
 - [ ] Create a GUI (in development)
+- [ ] Add docstrings and comment the code better (in development)
+- [ ] Change the description of this README, changing the video and the screenshots
