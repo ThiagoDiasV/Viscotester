@@ -1,3 +1,18 @@
+"""
+Viscotester: a Python script to process data from a viscosimeter
+Visco Tester 6L Haake.
+The documentation is in English but the program is used in a Brazilian
+laboratory, so the language of the prints is Portuguese-BR.
+This program is made specifically for Visco Tester 6L Haake and Windows OS.
+A viscosimeter is a equipment used to measure the viscosity of liquids and
+fluids. The equipment use tools named spindles. The spindle is immersed
+in the substance that will be evaluated and is rotated at different
+rotations.
+The output of equipment are the rotation per minute (RPM) parameter,
+the viscosity (cP) and the torque (%) value. The torque value is calculated
+based on the speed and the geometry of the spindle.
+"""
+
 import tkinter as tk
 import tkinter.scrolledtext as ScrolledText
 from tkinter import filedialog
