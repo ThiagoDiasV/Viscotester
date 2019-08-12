@@ -185,7 +185,7 @@ class Viscotester:
 
 class Results_Workbook:
     def __init__(self, filename):
-        self.file_name = gui.filename.get().replace(' ', '')
+        self.file_name = self.check_filename(gui.filename.get().replace(' ', ''))
         self.workbook_name = self.set_workbook_name_path(self.file_name)
 
         self.workbook = xlsxwriter.Workbook(self.workbook_name)
@@ -195,6 +195,11 @@ class Results_Workbook:
                              **{str(k): v for k, v in registers.items()})
         self.workbook.close()
         startfile(self.workbook_name)
+
+    def check_filename(self, filename):
+        regexp = re.compile(r'[\\/|<>*:?\"[\]]')
+        self.file_name = re.sub(regexp, '', filename)
+        return self.file_name
 
     def date_storage(self):
         '''
@@ -292,121 +297,121 @@ class Results_Workbook:
         log10 data.
         '''
 
-        worksheet_name = filename
-        worksheet = workbook.add_worksheet(worksheet_name)
-        bold = workbook.add_format({'bold': True})
-        italic = workbook.add_format({'italic': True})
-        float_format = workbook.add_format({'num_format': '0.0000'})
-        mean_format = workbook.add_format({'num_format': '0.00'})
-        percentage_format = workbook.add_format({'num_format': '0.00%'})
-        worksheet.set_column(0, 15, 16)
-        worksheet.set_column(4, 4, 25)
-        worksheet.set_column(9, 9, 20)
-        worksheet.write('A1', f'{worksheet_name}', bold)
-        worksheet.write('A2', 'Data', italic)
-        date_today = self.date_storage()
-        worksheet.write('A3',
-                        f'{date_today[0]:02d}/{date_today[1]:02d}/'
-                        f'{date_today[2]:04d}')
-        worksheet.write('B1', 'RPM', bold)
-        worksheet.write('C1', 'cP', bold)
-        worksheet.write('D1', 'Torque(%)', bold)
-        worksheet.write('E1', 'Processamento dos dados >>', bold)
-        worksheet.write('F1', 'RPM', bold)
-        worksheet.write('G1', 'Médias: cP', bold)
-        worksheet.write('H1', 'Desvio padrão: cP', bold)
-        worksheet.write('I1', 'DP (%): cP', bold)
-        worksheet.write('J1', 'Escala logarítmica >>', bold)
-        worksheet.write('K1', 'RPM Log10', bold)
-        worksheet.write('L1', 'cP Log10', bold)
-        worksheet.write('M1', 'Intercepto', bold)
-        worksheet.write('N1', 'Inclinação', bold)
-        worksheet.write('O1', 'R²', bold)
+        self.worksheet_name = filename[:30]
+        self.worksheet = workbook.add_worksheet(self.worksheet_name)
+        self.bold = workbook.add_format({'bold': True})
+        self.italic = workbook.add_format({'italic': True})
+        self.float_format = workbook.add_format({'num_format': '0.0000'})
+        self.mean_format = workbook.add_format({'num_format': '0.00'})
+        self.percentage_format = workbook.add_format({'num_format': '0.00%'})
+        self.worksheet.set_column(0, 15, 16)
+        self.worksheet.set_column(4, 4, 25)
+        self.worksheet.set_column(9, 9, 20)
+        self.worksheet.write('A1', f'{self.worksheet_name}', self.bold)
+        self.worksheet.write('A2', 'Data', self.italic)
+        self.date_today = self.date_storage()
+        self.worksheet.write('A3',
+                        f'{self.date_today[0]:02d}/{self.date_today[1]:02d}/'
+                        f'{self.date_today[2]:04d}')
+        self.worksheet.write('B1', 'RPM', self.bold)
+        self.worksheet.write('C1', 'cP', self.bold)
+        self.worksheet.write('D1', 'Torque(%)', self.bold)
+        self.worksheet.write('E1', 'Processamento dos dados >>', self.bold)
+        self.worksheet.write('F1', 'RPM', self.bold)
+        self.worksheet.write('G1', 'Médias: cP', self.bold)
+        self.worksheet.write('H1', 'Desvio padrão: cP', self.bold)
+        self.worksheet.write('I1', 'DP (%): cP', self.bold)
+        self.worksheet.write('J1', 'Escala logarítmica >>', self.bold)
+        self.worksheet.write('K1', 'RPM Log10', self.bold)
+        self.worksheet.write('L1', 'cP Log10', self.bold)
+        self.worksheet.write('M1', 'Intercepto', self.bold)
+        self.worksheet.write('N1', 'Inclinação', self.bold)
+        self.worksheet.write('O1', 'R²', self.bold)
 
         # The for loop below puts the read values inside .xlsx cells.
         # RPM, cP and torque values will be stored on cols 1, 2 and 3.
 
-        row = 1
-        col = 1
+        self.row = 1
+        self.col = 1
 
         for key, value in registers.items():
             for cp in value[0]:
-                worksheet.write(row, col, float(key))
-                worksheet.write(row, col + 1, cp)
-                row += 1
-            row -= len(value[0])
+                self.worksheet.write(self.row, self.col, float(key))
+                self.worksheet.write(self.row, self.col + 1, cp)
+                self.row += 1
+            self.row -= len(value[0])
             for torque in value[1]:
-                worksheet.write(row, col + 2, torque)
-                row += 1
-        processed_registers = self.data_processor(**registers)
+                self.worksheet.write(self.row, self.col + 2, torque)
+                self.row += 1
+        self.processed_registers = self.data_processor(**registers)
 
         # The for loop below puts the processed values inside .xlsx cells.
         # RPM, mean(cP), stdev and stdev% will be stored on cols 5, 6, 7 and 8.
 
-        row = col = 1
-        for key, value in processed_registers.items():
+        self.row = self.col = 1
+        for key, value in self.processed_registers.items():
             if mean(value[0]) != 0:
-                worksheet.write(row, col + 4, float(key))
+                self.worksheet.write(self.row, self.col + 4, float(key))
                 if len(value[0]) > 1:
-                    worksheet.write(row, col + 5, mean(value[0]), mean_format)
-                    worksheet.write(row, col + 6, stdev(value[0]), float_format)
-                    worksheet.write(row, col + 7,
+                    self.worksheet.write(self.row, self.col + 5, mean(value[0]), self.mean_format)
+                    self.worksheet.write(self.row, self.col + 6, stdev(value[0]), self.float_format)
+                    self.worksheet.write(self.row, self.col + 7,
                                     (stdev(value[0])/(mean(value[0]))),
-                                    percentage_format)
+                                    self.percentage_format)
                 else:
-                    worksheet.write(row, col + 5, value[0][0], mean_format)
-                    worksheet.write(row, col + 6, 0)
-                    worksheet.write(row, col + 7, 0)
+                    self.worksheet.write(self.row, self.col + 5, value[0][0], self.mean_format)
+                    self.worksheet.write(self.row, self.col + 6, 0)
+                    self.worksheet.write(self.row, self.col + 7, 0)
                 row += 1
 
-        log_list = self.logarithm_values_maker(**processed_registers)
+        self.log_list = self.logarithm_values_maker(**self.processed_registers)
 
         # write_column() function below puts the log10 values inside .xlsx cells.
 
-        worksheet.write_column('K2', log_list[0], float_format)
-        worksheet.write_column('L2', log_list[1], float_format)
-        worksheet.write_array_formula(
+        self.worksheet.write_column('K2', self.log_list[0], self.float_format)
+        self.worksheet.write_column('L2', self.log_list[1], self.float_format)
+        self.worksheet.write_array_formula(
                                       'M2:M2', '{=INTERCEPT(L2:L20, K2:K20)}',
-                                      float_format
+                                      self.float_format
                                       )
-        worksheet.write_array_formula(
+        self.worksheet.write_array_formula(
                                       'N2:N2', '{=SLOPE(L2:L20, K2:K20)}',
-                                      float_format
+                                      self.float_format
                                       )
-        worksheet.write_array_formula(
+        self.worksheet.write_array_formula(
                                       'O2:O2', '{=RSQ(K2:K20, L2:L20)}',
-                                      float_format
+                                      self.float_format
                                       )
 
-        chart_1 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
-        chart_1.add_series({
-            'categories': f'={worksheet_name.replace(" ", "")}'
-                          f'!$F2$:$F${len(processed_registers.keys()) + 1}',
-            'values': f'={worksheet_name.replace(" ", "")}'
-                      f'!$G$2:$G${len(processed_registers.values()) + 1}',
+        self.chart_1 = self.workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+        self.chart_1.add_series({
+            'categories': f'={self.worksheet_name.replace(" ", "")}'
+                          f'!$F2$:$F${len(self.processed_registers.keys()) + 1}',
+            'values': f'={self.worksheet_name.replace(" ", "")}'
+                      f'!$G$2:$G${len(self.processed_registers.values()) + 1}',
             'line': {'color': 'green'}
             })
-        chart_1.set_title({'name': f'{worksheet_name}'})
-        chart_1.set_x_axis({
+        self.chart_1.set_title({'name': f'{self.worksheet_name}'})
+        self.chart_1.set_x_axis({
             'name': 'RPM',
             'name_font': {'size': 14, 'bold': True},
         })
-        chart_1.set_y_axis({
+        self.chart_1.set_y_axis({
             'name': 'cP',
             'name_font': {'size': 14, 'bold': True},
         })
-        chart_1.set_size({
+        self.chart_1.set_size({
             'width': 500,
             'height': 400
         })
-        worksheet.insert_chart(row + 2, 5, chart_1)
+        self.worksheet.insert_chart(self.row + 2, 5, self.chart_1)
 
-        chart_2 = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
-        chart_2.add_series({
-            'categories': f'={worksheet_name.replace(" ", "")}'
-                          f'!$K$2:$K${len(processed_registers.keys()) + 1}',
-            'values': f'={worksheet_name.replace(" ", "")}'
-                      f'!$L$2:$L${len(processed_registers.values()) + 1}',
+        self.chart_2 = self.workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+        self.chart_2.add_series({
+            'categories': f'={self.worksheet_name.replace(" ", "")}'
+                          f'!$K$2:$K${len(self.processed_registers.keys()) + 1}',
+            'values': f'={self.worksheet_name.replace(" ", "")}'
+                      f'!$L$2:$L${len(self.processed_registers.values()) + 1}',
             'line': {'color': 'blue'},
             'trendline': {
                 'type': 'linear',
@@ -419,25 +424,26 @@ class Results_Workbook:
                 },
             },
         })
-        chart_2.set_title({'name': f'Curva escala log: {worksheet_name}'})
-        chart_2.set_x_axis({
+        self.chart_2.set_title({'name': f'Curva escala log: {self.worksheet_name}'})
+        self.chart_2.set_x_axis({
             'name': 'RPM',
             'name_font': {'size': 14, 'bold': True},
         })
-        chart_2.set_y_axis({
+        self.chart_2.set_y_axis({
             'name': 'cP',
             'name_font': {'size': 14, 'bold': True},
         })
-        chart_2.set_size({
+        self.chart_2.set_size({
             'width': 500,
             'height': 400
         })
-        worksheet.insert_chart(row + 2, 10, chart_2)
+        self.worksheet.insert_chart(self.row + 2, 10, self.chart_2)
 
 
 if __name__ == '__main__':
 
     root = Tk()
+    root.resizable(0, 0)
     viscotester = Viscotester()
     gui = Gui(root)
     root.mainloop()
