@@ -1,7 +1,14 @@
 altgraph==0.16.1
 future==0.17.1
+mccabe==0.6.1
 pefile==2019.4.18
+Pillow==6.1.0
+pycodestyle==2.5.0
+pydocstyle==4.0.0
+pyflakes==2.1.1
 PyInstaller==3.5
+pylama==7.7.1
 pyserial==3.4
 pywin32-ctypes==0.2.0
+snowballstemmer==1.9.0
 XlsxWriter==1.1.8

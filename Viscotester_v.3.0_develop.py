@@ -172,7 +172,6 @@ class Viscotester:
                 prints = (f'RPM: {rpm:.>15} /// '
                             f'cP: {cp:.>15} /// '
                             f'Torque: {torque:.>15}%')
-                print(self.registers)
             else:
                 prints = f'ERRO!'
             logging.info(prints)
@@ -293,8 +292,8 @@ class Results_Workbook:
         log10 data.
         '''
 
-        worksheet = workbook.add_worksheet()
         worksheet_name = filename
+        worksheet = workbook.add_worksheet(worksheet_name)
         bold = workbook.add_format({'bold': True})
         italic = workbook.add_format({'italic': True})
         float_format = workbook.add_format({'num_format': '0.0000'})
