@@ -110,6 +110,7 @@ class Gui(tk.Frame):
 
         text_handler = PrintResults(st)
 
+        # Change this logic
         logging.basicConfig(filename=f'Viscotester/{self.filename.get()}.log',
                             level=logging.INFO,
                             format='%(asctime)s - %(message)s')
