@@ -104,8 +104,8 @@ class Gui(tk.Frame):
         self.stop_analysis.grid(column=1, row=3)
 
         self.save_workbook = tk.Button(
-                                    self, 
-                                    text="Salvar análise e abrir planilha", 
+                                    self,
+                                    text="Salvar análise e abrir planilha",
                                     width=28,
                                     command=self.save_workbook
                                     )
@@ -221,8 +221,8 @@ class Viscotester:
                 values = (rpm, cp, torque)
                 self._registers = values_storager(*values)
                 prints = (f'RPM: {rpm:.>15} /// '
-                            f'cP: {cp:.>15} /// '
-                            f'Torque: {torque:.>15}%')
+                          f'cP: {cp:.>15} /// '
+                          f'Torque: {torque:.>15}%')
             else:
                 prints = f'ERRO!'
             logging.info(prints)
@@ -333,21 +333,21 @@ class Results_Workbook:
 
     def worksheet_maker(self, workbook, filename, workbook_name, **registers):
         '''
-        This function creates new worksheets inside the created workbook and put
-        the values in columns.
+        This function creates new worksheets inside the created workbook and
+        put the values in columns.
         In each worksheet:
         Column 'A' will store the sample name and the date.
         Columns 'B', 'C', and 'D' will store all read data (RPM, cP and Torque
         values).
         Columns 'F', 'G', 'H', and 'I' will store the processed data, without
-        outliers, respectively: RPM, average cP, standard deviation and relative
-        standard deviation.
+        outliers, respectively: RPM, average cP, standard deviation and
+        relative standard deviation.
         Columns 'K' and 'L' will receive log10 values of processed RPM and cP
         values.
-        Finally, in columns 'M', 'N' and 'O', the cells 'M2', 'N2' and 'O2' will
-        receive intercept, slope and R squared values of log10 values.
-        Each worksheet will have two charts, one for processed data and other for
-        log10 data.
+        Finally, in columns 'M', 'N' and 'O', the cells 'M2', 'N2' and 'O2'
+        will receive intercept, slope and R squared values of log10 values.
+        Each worksheet will have two charts, one for processed data and other
+        for log10 data.
         '''
 
         self.worksheet_name = filename[:30]
@@ -364,8 +364,9 @@ class Results_Workbook:
         self.worksheet.write('A2', 'Data', self.italic)
         self.date_today = self.date_storage()
         self.worksheet.write('A3',
-                        f'{self.date_today[0]:02d}/{self.date_today[1]:02d}/'
-                        f'{self.date_today[2]:04d}')
+                             f'{self.date_today[0]:02d}/'
+                             f'{self.date_today[1]:02d}/'
+                             f'{self.date_today[2]:04d}')
         self.worksheet.write('B1', 'RPM', self.bold)
         self.worksheet.write('C1', 'cP', self.bold)
         self.worksheet.write('D1', 'Torque(%)', self.bold)
@@ -406,20 +407,27 @@ class Results_Workbook:
             if mean(value[0]) != 0:
                 self.worksheet.write(self.row, self.col + 4, float(key))
                 if len(value[0]) > 1:
-                    self.worksheet.write(self.row, self.col + 5, mean(value[0]), self.mean_format)
-                    self.worksheet.write(self.row, self.col + 6, stdev(value[0]), self.float_format)
-                    self.worksheet.write(self.row, self.col + 7,
+                    self.worksheet.write(self.row, self.col + 5,
+                                         mean(value[0]),
+                                         self.mean_format)
+                    self.worksheet.write(self.row, self.col + 6,
+                                         stdev(value[0]),
+                                         self.float_format)
+                    self.worksheet.write(
+                                    self.row, self.col + 7,
                                     (stdev(value[0])/(mean(value[0]))),
                                     self.percentage_format)
                 else:
-                    self.worksheet.write(self.row, self.col + 5, value[0][0], self.mean_format)
+                    self.worksheet.write(self.row,
+                                         self.col + 5, value[0][0],
+                                         self.mean_format)
                     self.worksheet.write(self.row, self.col + 6, 0)
                     self.worksheet.write(self.row, self.col + 7, 0)
                 self.row += 1
 
         self.log_list = self.logarithm_values_maker(**self.processed_registers)
 
-        # write_column() function below puts the log10 values inside .xlsx cells.
+        # write_column() function below puts the log10 values inside cells.
 
         self.worksheet.write_column('K2', self.log_list[0], self.float_format)
         self.worksheet.write_column('L2', self.log_list[1], self.float_format)
@@ -436,10 +444,14 @@ class Results_Workbook:
                                       self.float_format
                                       )
 
-        self.chart_1 = self.workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+        self.chart_1 = self.workbook.add_chart({
+                                        'type': 'scatter',
+                                        'subtype': 'straight'
+                                        })
         self.chart_1.add_series({
-            'categories': f'={self.worksheet_name.replace(" ", "")}'
-                          f'!$F2$:$F${len(self.processed_registers.keys()) + 1}',
+            'categories': (
+                f'={self.worksheet_name.replace(" ", "")}'
+                f'!$F2$:$F${len(self.processed_registers.keys()) + 1}'),
             'values': f'={self.worksheet_name.replace(" ", "")}'
                       f'!$G$2:$G${len(self.processed_registers.values()) + 1}',
             'line': {'color': 'green'}
@@ -459,10 +471,14 @@ class Results_Workbook:
         })
         self.worksheet.insert_chart(self.row + 2, 5, self.chart_1)
 
-        self.chart_2 = self.workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+        self.chart_2 = self.workbook.add_chart({
+                                    'type': 'scatter',
+                                    'subtype': 'straight'
+                                    })
         self.chart_2.add_series({
-            'categories': f'={self.worksheet_name.replace(" ", "")}'
-                          f'!$K$2:$K${len(self.processed_registers.keys()) + 1}',
+            'categories': (
+                    f'={self.worksheet_name.replace(" ", "")}'
+                    f'!$K$2:$K${len(self.processed_registers.keys()) + 1}'),
             'values': f'={self.worksheet_name.replace(" ", "")}'
                       f'!$L$2:$L${len(self.processed_registers.values()) + 1}',
             'line': {'color': 'blue'},
@@ -477,7 +493,9 @@ class Results_Workbook:
                 },
             },
         })
-        self.chart_2.set_title({'name': f'Curva escala log: {self.worksheet_name}'})
+        self.chart_2.set_title({
+                        'name': f'Curva escala log: {self.worksheet_name}'
+                        })
         self.chart_2.set_x_axis({
             'name': 'RPM',
             'name_font': {'size': 14, 'bold': True},
